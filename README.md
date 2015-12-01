@@ -5,7 +5,7 @@ A simple docker composition tool with runtime dependencies between containers. '
 
 *https://openclipart.org/detail/176279/shipbuilding-crane*
 
-First use package manager to install python yaml, e.g. apt-get install python-yaml, and then follow
+First use package manager to install python yaml, e.g. `apt-get install python-yaml`, and then follow
 these instructions:
 
     sudo rm -f /usr/local/bin/grua # in case you are reinstalling
