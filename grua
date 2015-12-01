@@ -62,7 +62,7 @@ def tpl_lookup(key):
 
 
 def parse_template(tpl):
-    a1 = tpl.split("<%")
+    a1 = str(tpl).split("<%")
     out=''
     for i in range(0,len(a1)):
         if i%2==1: # odd, replace template
@@ -149,16 +149,33 @@ def wait_for_up(container, config):
         print "Waiting for '" + logmsg + "' to indicate that " + container + " is up"
         waited=0
         while waited <= timeout:
-            output = subprocess.check_output("docker logs " + Project + "_" + container, shell=True)
-            if  output.find(logmsg):
+            command=["docker",  "logs", Project + "_" + container]
+            output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+            if output.find(logmsg) > 0 :
                 return
             time.sleep(2)
             waited=waited + 2
 
+    if upwhen.has_key('sleep'):
+        print "Sleeping " + str(upwhen['sleep']) + " extra seconds as configured"
+        time.sleep(int(upwhen['sleep']))
+        return
+    
     raise Exception("Timed out waiting for " + container + " to start")
 
 
-def run_container(container, config):
+def get_image(config):
+
+    if config.has_key('image'):
+        image = get_value(config,'image')#.split(':')[0]
+    elif config.has_key('tag'):
+        image = get_value(config,'tag')
+    else:
+        image = Project + '/' + get_value(config,'build')
+
+    return image
+
+def load_container(container, config):
 
     if config.has_key('run') and not config['run']:
         print "container has 'run' key set to " + str(config['run']) + ", skipping"
@@ -166,8 +183,9 @@ def run_container(container, config):
 
     command = [ 'docker', 'run', '-d', '--name', Project + "_" + container ]
 
+
     if config.has_key('hostname'):
-        command = command + ['--name', Project + "_" + get_value(config,'hostname')]
+        command = command + ['--hostname', get_value(config,'hostname')]
 
     if config.has_key('dns'):
         command = command + ['--dns', get_value(config,'dns')]
@@ -182,21 +200,14 @@ def run_container(container, config):
 
     if config.has_key('environment'):
         for envvar in config['environment']:
-            command = command + ['-e', parse_template(envvar)]
+            command = command + ['-e', parse_template(envvar) + '=' + parse_template(config['environment'][envvar])]
 
     if config.has_key('options'):
         for option in config['options']:
             command = command + [parse_template(option)]
 
 
-    if config.has_key('image'):
-        image = get_value(config,'image')#.split(':')[0]
-    elif config.has_key('tag'):
-        image = get_value(config,'tag')
-    else:
-        image = Project + '/' + get_value(config,'build')
-
-    command.append(image)
+    command.append(get_image(config))
 
     if config.has_key('command'):
         command = command + shlex.split(get_value(config,'command'))
@@ -209,11 +220,18 @@ def run_container(container, config):
 
 
 
-def stop_container(container):
-    call(['docker', 'stop', Project + '_' + container])
+def unload_container(container):
+    call(['docker', 'rm', '--force', Project + '_' + container])
 
-def rm_container(container):
-    call(['docker', 'rm', Project + '_' + container])
+
+def container_status(container):
+    output = subprocess.check_output(['docker', 'inspect', '--format="{{.State.Status}}"', Project + '_' + container],
+                                     stderr=subprocess.STDOUT)
+    print(Project + '_' + container + ": " + output),
+
+
+def remove_image(container, config):
+    call(['docker', 'rmi', get_image(config)])
 
 
 def process_command(command_list):
@@ -230,30 +248,43 @@ def process_command(command_list):
         for container in which:
             build_container(container, config[container])
 
-    elif command == 'run':
+    elif command == 'load':
         for container in which :
             if config[container].has_key('run') and not config[container]['run']:
                 pass
             else:
-                run_container(container, config[container])
+                load_container(container, config[container])
             
-    elif command == 'stop':
+    elif command == 'unload':
         for container in which:
 
             if config[container].has_key('run') and not config[container]['run']:
                 pass
             else:
-                stop_container(container)
+                unload_container(container)
 
-
-    elif command == 'rm':
+    elif command == 'reload':
         for container in which:
 
             if config[container].has_key('run') and not config[container]['run']:
                 pass
             else:
-                rm_container(container)
+                unload_container(container)
+                load_container(container, config[container])
 
+    elif command == "status":
+        for container in which:
+            if config[container].has_key('run') and not config[container]['run']:
+                pass
+            else:
+                container_status(container)
+
+    elif command == "rmi":
+        for container in which:
+            remove_image(container, config[container])
+
+    else:
+        raise Exception("Unknown command '" + command + "'")
 
 def find_yaml_location():
     pathname = os.path.curdir
@@ -280,10 +311,11 @@ args=sys.argv[1:]
 
 def usage():
     print "\tgrua\n\t----\n"
-    print "\tgrua build"
-    print "\tgrua run"
-    print "\tgrua stop"
-    print "\tgrua rm"
+    print "\tgrua build\tBuild requisite containers"
+    print "\tgrua load\tRun container composition"
+    print "\tgrua unload\tStop and remove container composition"
+    print "\tgrua reload\tUnload and reload container composition"
+
     print
 
 if len(args) > 0:
