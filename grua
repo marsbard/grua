@@ -186,7 +186,6 @@ def process_command(command_list):
 
 def find_yaml_location():
     pathname = os.path.curdir
-    print pathname
     while pathname != '/': # TODO: windows incompatibility
         if os.path.isfile(pathname + '/grua.yaml'):
             return pathname
