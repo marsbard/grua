@@ -1,11 +1,29 @@
 #!/usr/bin/env python
 
-import yaml, os.path, sys
+import yaml, os.path, sys, time, subprocess, shlex, re
 from collections import deque
 from subprocess import call
 
 
 Project='grua' # eventually offer a --project arg
+
+
+def find_bridge_ip():
+    command = [ "ip", "addr", "show", "dev", "docker0" ]
+    sp = subprocess.Popen((command), stdout=subprocess.PIPE)
+    output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split()[1].split('/')[0]
+
+    sp.wait()
+
+    p = re.compile('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
+
+    if not p.match(output):
+        raise Exception(output + " is not a valid IP address for BridgeIP")
+
+    return output
+
+BridgeIp = find_bridge_ip()
+print BridgeIp
 
 
 
@@ -91,6 +109,28 @@ def build_container(container, config):
         call(['docker', 'pull', config['image']])
 
 
+def wait_for_up(container, config):
+    upwhen = config['upwhen']
+    timeout=30
+    if upwhen.has_key('timeout'):
+        timeout=upwhen['timeout']
+
+    if upwhen.has_key('logmsg'):
+        logmsg = upwhen['logmsg']
+
+
+        print "Waiting for '" + logmsg + "' to indicate that " + container + " is up"
+        waited=0
+        while waited <= timeout:
+            output = subprocess.check_output("docker logs " + Project + "_" + container, shell=True)
+            if  output.find(upwhen['logmsg']):
+                return
+            time.sleep(2)
+            waited=waited + 2
+
+    raise Exception("Timed out waiting for " + container + " to start")
+
+
 def run_container(container, config):
 
     if config.has_key('run') and not config['run']:
@@ -132,10 +172,14 @@ def run_container(container, config):
     command.append(image)
 
     if config.has_key('command'):
-        command.append(config['command'])
+        command = command + shlex.split(config['command'])
 
     print command
     call(command)
+
+    if config.has_key('upwhen'):
+        wait_for_up(container, config)
+
 
 
 def stop_container(container):
