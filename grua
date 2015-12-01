@@ -23,7 +23,6 @@ def find_bridge_ip():
     return output
 
 BridgeIp = find_bridge_ip()
-print BridgeIp
 
 
 
@@ -55,6 +54,34 @@ def topological_sort(source):
 
 
 deps = dict()
+
+
+def tpl_lookup(key):
+    if key == 'BRIDGE_IP':
+        return BridgeIp
+
+
+def parse_template(tpl):
+    a1 = tpl.split("<%")
+    out=''
+    for i in range(0,len(a1)):
+        if i%2==1: # odd, replace template
+            a2 = a1[i].split("%>")
+            if len(a2) > 1:
+                out += tpl_lookup(a2[0].strip())
+                out += a2[1]
+            else:
+                out += a2[0]
+        else: # even, use directly
+            out += a1[i]
+
+    return out
+
+def get_value(dict, key):
+    if not dict.has_key(key):
+        return ''
+
+    return parse_template(dict[key])
 
 def calc_deps(container,config):
     for key in config[container]:
@@ -102,28 +129,28 @@ def build_container(container, config):
         # for now just use container name as the tag
         tag=Project + "/" + container
         if config.has_key('tag'):
-            tag=config['tag']
-        call([ 'docker', 'build', '-t', tag, config['build']])
+            tag=get_value(config, 'tag')
+        call([ 'docker', 'build', '-t', tag, get_value(config,'build')])
     else:
-        print container + " uses an image. Pulling " + config['image']
-        call(['docker', 'pull', config['image']])
+        print container + " uses an image. Pulling " + get_value(config,'image')
+        call(['docker', 'pull', get_value(config,'image')])
 
 
 def wait_for_up(container, config):
     upwhen = config['upwhen']
     timeout=30
     if upwhen.has_key('timeout'):
-        timeout=upwhen['timeout']
+        timeout=get_value(upwhen,'timeout')
 
     if upwhen.has_key('logmsg'):
-        logmsg = upwhen['logmsg']
+        logmsg = get_value(upwhen, 'logmsg')
 
 
         print "Waiting for '" + logmsg + "' to indicate that " + container + " is up"
         waited=0
         while waited <= timeout:
             output = subprocess.check_output("docker logs " + Project + "_" + container, shell=True)
-            if  output.find(upwhen['logmsg']):
+            if  output.find(logmsg):
                 return
             time.sleep(2)
             waited=waited + 2
@@ -140,39 +167,39 @@ def run_container(container, config):
     command = [ 'docker', 'run', '-d', '--name', Project + "_" + container ]
 
     if config.has_key('hostname'):
-        command = command + ['--name', Project + "_" + config['hostname']]
+        command = command + ['--name', Project + "_" + get_value(config,'hostname')]
 
     if config.has_key('dns'):
-        command = command + ['--dns', config['dns']]
+        command = command + ['--dns', get_value(config,'dns')]
 
     if config.has_key('volumes'):
         for volumespec in config['volumes']:
-            command = command + ['-v', volumespec]
+            command = command + ['-v', parse_template(volumespec)]
 
     if config.has_key('ports'):
         for portspec in config['ports']:
-            command = command + ['-p', portspec]
+            command = command + ['-p', parse_template(portspec)]
 
     if config.has_key('environment'):
         for envvar in config['environment']:
-            command = command + ['-e', envvar]
+            command = command + ['-e', parse_template(envvar)]
 
     if config.has_key('options'):
         for option in config['options']:
-            command = command + [option]
+            command = command + [parse_template(option)]
 
 
     if config.has_key('image'):
-        image = config['image']#.split(':')[0]
+        image = get_value(config,'image')#.split(':')[0]
     elif config.has_key('tag'):
-        image = config['tag']
+        image = get_value(config,'tag')
     else:
-        image = Project + '/' + config['build']
+        image = Project + '/' + get_value(config,'build')
 
     command.append(image)
 
     if config.has_key('command'):
-        command = command + shlex.split(config['command'])
+        command = command + shlex.split(get_value(config,'command'))
 
     print command
     call(command)
@@ -195,7 +222,7 @@ def process_command(command_list):
     command = commands.popleft()
 
     if len(commands) > 0:
-        which = commands.popleft()
+        which = [ commands.popleft() ]
     else:
         which = sorted_run_deps
 
