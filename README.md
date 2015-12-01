@@ -1,5 +1,5 @@
 # grua
-A simple docker composition tool with runtime dependencies between containers
+A simple docker composition tool with runtime dependencies between containers. 'Grua' is Spanish for 'crane'
 
 ![](https://openclipart.org/image/200px/svg_to_png/176279/shipbuilding-crane-1.png)
 
@@ -12,5 +12,3 @@ these instructions:
     sudo wget https://raw.githubusercontent.com/marsbard/grua/master/grua -O /usr/local/bin/grua
     sudo chmod +x /usr/local/bin/grua
 
-
-'grua' is Spanish for 'crane'.
