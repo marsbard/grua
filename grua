@@ -196,7 +196,6 @@ def find_yaml_location():
 
 yamlpath = find_yaml_location()
 
-print yamlpath
 os.chdir(yamlpath)
 
 with open(yamlpath + "/grua.yaml", 'r') as stream:
