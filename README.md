@@ -1,6 +1,6 @@
 # grua
 
-![https://openclipart.org/detail/176279/shipbuilding-crane](https://openclipart.org/image/2400px/svg_to_png/176279/shipbuilding-crane-1.png)
+![https://openclipart.org/detail/176279/shipbuilding-crane](https://openclipart.org/image/2400px/svg_to_png/176279/shipbuilding-crane-1.png =100x20)
 
 A simple docker composition tool with runtime dependencies between containers
 
