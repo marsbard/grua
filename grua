@@ -1,0 +1,225 @@
+#!/usr/bin/env python
+
+import yaml, os.path, sys
+from collections import deque
+from subprocess import call
+
+
+Project='grua' # eventually offer a --project arg
+
+
+
+# http://stackoverflow.com/a/11564323
+def topological_sort(source):
+  """perform topo sort on elements.
+
+  :arg source: list of ``(name, [list of dependencies])`` pairs
+  :returns: list of names, with dependencies listed first
+  """
+  pending = [(name, set(deps)) for name, deps in source] # copy deps so we can modify set in-place
+  emitted = []
+  while pending:
+    next_pending = []
+    next_emitted = []
+    for entry in pending:
+      name, deps = entry
+      deps.difference_update(emitted) # remove deps we emitted last pass
+      if deps: # still has deps? recheck during next pass
+        next_pending.append(entry)
+      else: # no more deps? time to emit
+        yield name
+        emitted.append(name) # <-- not required, but helps preserve original ordering
+        next_emitted.append(name) # remember what we emitted for difference_update() in next pass
+    if not next_emitted: # all entries have unmet deps, one of two things is wrong...
+      raise ValueError("cyclic or missing dependency detected: %r" % (next_pending,))
+    pending = next_pending
+    emitted = next_emitted
+
+
+deps = dict()
+
+def calc_deps(container,config):
+    for key in config[container]:
+        if not deps.has_key(container):
+            deps[container]=[]
+        val = config[container][key]
+        if key == "before":
+            for before in val:
+                if before not in deps:
+                    deps[before]=[container]
+                else:
+                    deps[before].append(container)
+
+        if key == "after":
+            if container not in deps:
+                deps[container]=val
+            else:
+                for after in val:
+                    if after not in deps[container]:
+                        deps[container].append(after)
+
+
+def process_container(container, config):
+    calc_deps(container,config)
+
+
+def sort_containers():
+    tups=list()
+    for dep in deps.keys():
+        tups.append((dep, deps[dep]))
+
+    s = topological_sort(tups)
+
+    sorted=list();
+    for dummy in deps:
+        sorted.append(s.next())
+    return sorted
+
+
+def build_container(container, config):
+    if config.has_key('build'):
+        if config['build']=='':
+            raise NotImplementedError('You have not specified an image nor a build directory')
+        print "building " + container
+        # for now just use container name as the tag
+        tag=Project + "/" + container
+        if config.has_key('tag'):
+            tag=config['tag']
+        call([ 'docker', 'build', '-t', tag, config['build']])
+    else:
+        print container + " uses an image. Pulling " + config['image']
+        call(['docker', 'pull', config['image']])
+
+
+def run_container(container, config):
+
+    if config.has_key('run') and not config['run']:
+        print "container has 'run' key set to " + str(config['run']) + ", skipping"
+        return
+
+    command = [ 'docker', 'run', '-d', '--name', Project + "_" + container ]
+
+    if config.has_key('hostname'):
+        command = command + ['--name', Project + "_" + config['hostname']]
+
+    if config.has_key('dns'):
+        command = command + ['--dns', config['dns']]
+
+    if config.has_key('volumes'):
+        for volumespec in config['volumes']:
+            command = command + ['-v', volumespec]
+
+    if config.has_key('ports'):
+        for portspec in config['ports']:
+            command = command + ['-p', portspec]
+
+    if config.has_key('environment'):
+        for envvar in config['environment']:
+            command = command + ['-e', envvar]
+
+    if config.has_key('options'):
+        for option in config['options']:
+            command = command + [option]
+
+
+    if config.has_key('image'):
+        image = config['image']#.split(':')[0]
+    elif config.has_key('tag'):
+        image = config['tag']
+    else:
+        image = Project + '/' + config['build']
+
+    command.append(image)
+
+    if config.has_key('command'):
+        command.append(config['command'])
+
+    print command
+    call(command)
+
+
+def stop_container(container):
+    call(['docker', 'stop', Project + '_' + container])
+
+def rm_container(container):
+    call(['docker', 'rm', Project + '_' + container])
+
+
+def process_command(command_list):
+    commands = deque(command_list)
+
+    command = commands.popleft()
+
+    if len(commands) > 0:
+        which = commands.popleft()
+    else:
+        which = sorted_run_deps
+
+    if command == 'build':
+        for container in which:
+            build_container(container, config[container])
+
+    elif command == 'run':
+        for container in which :
+            if config[container].has_key('run') and not config[container]['run']:
+                pass
+            else:
+                run_container(container, config[container])
+            
+    elif command == 'stop':
+        for container in which:
+
+            if config[container].has_key('run') and not config[container]['run']:
+                pass
+            else:
+                stop_container(container)
+
+
+    elif command == 'rm':
+        for container in which:
+
+            if config[container].has_key('run') and not config[container]['run']:
+                pass
+            else:
+                rm_container(container)
+
+
+def find_yaml_location():
+    pathname = os.path.curdir
+    print pathname
+    while pathname != '/': # TODO: windows incompatibility
+        if os.path.isfile(pathname + '/grua.yaml'):
+            return pathname
+        pathname = os.path.abspath(os.path.join(pathname, os.pardir))
+
+    raise(IOError("grua.yaml file not found"))
+
+
+yamlpath = find_yaml_location()
+
+print yamlpath
+os.chdir(yamlpath)
+
+with open(yamlpath + "/grua.yaml", 'r') as stream:
+    config = yaml.load(stream)
+    for container in config:
+        process_container(container, config)
+
+sorted_run_deps = sort_containers()
+
+args=sys.argv[1:]
+
+def usage():
+    print "\tgrua\n\t----\n"
+    print "\tgrua build"
+    print "\tgrua run"
+    print "\tgrua stop"
+    print "\tgrua rm"
+    print
+
+if len(args) > 0:
+    #print sorted_run_deps
+    process_command(args)
+else:
+    usage()
+
