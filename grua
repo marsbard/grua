@@ -7,7 +7,13 @@ from subprocess import call
 Project = 'grua'  # gets replaced by 'project' value in 'global' from grua.yaml
 
 def announce(msg):
-    print "\n\t>>> " + msg + "\n"
+    print "\n>>> " + msg + "\n"
+
+def mention(msg):
+    print ">> " + msg
+
+def note(msg):
+    print "> " + msg
 
 def find_bridge_ip():
     command = ["ip", "addr", "show", "dev", "docker0"]
@@ -133,7 +139,7 @@ def process_container(container, config):
     calc_deps(container, config)
 
 
-def stack_container(container, config):
+def fill_container(container, config):
     announce("Stacking "  + container)
     if config.has_key('build'):
         tag = Project + "/" + container
@@ -157,10 +163,10 @@ def stack_container(container, config):
             call(['git', 'clone', url, dir])
             target = dir
 
-        print "building " + container + " ( " + target + " ) " + " with tag '" + tag + "'"
+        mention("building " + container + " ( " + target + " ) " + " with tag '" + tag + "'")
         call(['docker', 'build', '-t', tag, target])
     else:
-        print container + " uses an image. Pulling " + get_value(config, 'image')
+        mention(container + " uses an image. Pulling " + get_value(config, 'image'))
         call(['docker', 'pull', get_value(config, 'image')])
 
 
@@ -170,12 +176,10 @@ def wait_for_up(container, config):
     if upwhen.has_key('timeout'):
         timeout = get_value(upwhen, 'timeout')
 
-    print "timeout=" + str(timeout)
-
     if upwhen.has_key('logmsg'):
         logmsg = get_value(upwhen, 'logmsg')
 
-    print "Waiting for '" + logmsg + "' to indicate that " + container + " is up"
+    mention("Waiting for '" + logmsg + "' to indicate that " + container + " is up")
     waited = 0
     ok = False
     while waited <= timeout:
@@ -189,7 +193,7 @@ def wait_for_up(container, config):
             waited = waited + 1
 
     if upwhen.has_key('sleep'):
-        print "Sleeping " + str(upwhen['sleep']) + " extra seconds as configured"
+        mention("Sleeping " + str(upwhen['sleep']) + " extra seconds as configured")
         time.sleep(int(upwhen['sleep']))
 
     if not ok:
@@ -207,9 +211,10 @@ def get_image(config):
     return image
 
 
-def load_container(container, config):
+def stack_container(container, config):
+    announce("Loading " + container)
     if config.has_key('run') and not config['run']:
-        print "container has 'run' key set to " + str(config['run']) + ", skipping"
+        note ("container has 'run' key set to " + str(config['run']) + ", skipping")
         return
 
     command = ['docker', 'run', '-d', '--name', Project + "_" + container]
@@ -245,14 +250,15 @@ def load_container(container, config):
     if config.has_key('command'):
         command = command + shlex.split(get_value(config, 'command'))
 
-    print "-- " + " ".join(command)
+    note(" ".join(command))
     call(command)
 
     if config.has_key('upwhen'):
         wait_for_up(container, config)
 
 
-def unload_container(container):
+def unstack_container(container):
+    announce("Unloading " + container)
     call(['docker', 'rm', '--force', Project + '_' + container])
 
 
@@ -263,6 +269,7 @@ def container_status(container):
 
 
 def remove_image(container, config):
+    announce("Removing image " + get_image(config))
     call(['docker', 'rmi', get_image(config)])
 
 
@@ -278,33 +285,33 @@ def process_command(command_list):
         deps = sorted_run_deps
         deps.remove('global')
         which = deps
-    if command == 'stack':
+    if command == 'fill':
         for container in which:
-            stack_container(container, config[container])
+            fill_container(container, config[container])
 
-    elif command == 'load':
+    elif command == 'stack':
         for container in which:
             if config[container].has_key('run') and not config[container]['run']:
                 pass
             else:
-                load_container(container, config[container])
+                stack_container(container, config[container])
 
-    elif command == 'unload':
-        for container in which:
-
-            if config[container].has_key('run') and not config[container]['run']:
-                pass
-            else:
-                unload_container(container)
-
-    elif command == 'reload':
+    elif command == 'unstack':
         for container in which:
 
             if config[container].has_key('run') and not config[container]['run']:
                 pass
             else:
-                unload_container(container)
-                load_container(container, config[container])
+                unstack_container(container)
+
+    elif command == 'restack':
+        for container in which:
+
+            if config[container].has_key('run') and not config[container]['run']:
+                pass
+            else:
+                unstack_container(container)
+                stack_container(container, config[container])
 
     elif command == "status":
         for container in which:
@@ -346,10 +353,10 @@ def find_yaml_location():
 
 def usage():
     print "\tgrua\n\t----\n"
-    print "\tgrua stack\tBuild requisite containers"
-    print "\tgrua load\tRun container composition"
-    print "\tgrua unload\tStop and remove container composition"
-    print "\tgrua reload\tUnload and reload container composition"
+    print "\tgrua fill\tBuild requisite containers"
+    print "\tgrua stack\tRun container composition"
+    print "\tgrua unstack\tStop and remove container composition"
+    print "\tgrua restack\tUnload and reload container composition"
 
     print
 
