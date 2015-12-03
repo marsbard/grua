@@ -5,6 +5,9 @@ from collections import deque
 from subprocess import call
 
 Project = 'grua'  # gets replaced by 'project' value in 'global' from grua.yaml
+UnstackTimeout = 15
+Dependencies = dict()
+
 
 def announce(msg):
     print "\n>>> " + msg + "\n"
@@ -15,9 +18,14 @@ def mention(msg):
 def note(msg):
     print "> " + msg
 
+
+
+
+
 def find_bridge_ip():
     command = ["ip", "addr", "show", "dev", "docker0"]
     sp = subprocess.Popen((command), stdout=subprocess.PIPE)
+
     output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split()[1].split('/')[0]
 
     sp.wait()
@@ -30,8 +38,9 @@ def find_bridge_ip():
 
     return output
 
-
 BridgeIp = find_bridge_ip()
+
+
 
 
 # http://stackoverflow.com/a/11564323
@@ -61,14 +70,13 @@ def topological_sort(source):
         emitted = next_emitted
 
 
-deps = dict()
 
 
 def inspect_container(container, go_template):
-    print go_template
-    command = ['docker', 'inspect', '-f', '"' + (" ").join(go_template) + '"', Project + "_" + container]
+    command = ['docker', 'inspect', '-f', (" ").join(go_template), Project + "_" + container]
 
-    return subprocess.check_output(command, stderr=subprocess.STDOUT)
+    # note(" ".join(command))
+    return subprocess.check_output(command, stderr=subprocess.STDOUT).strip()
 
 def tpl_lookup(template):
     words = template.split()
@@ -116,23 +124,23 @@ def get_value(dict, key):
 
 def calc_deps(container, config):
     for key in config[container]:
-        if not deps.has_key(container):
-            deps[container] = []
+        if not Dependencies.has_key(container):
+            Dependencies[container] = []
         val = config[container][key]
         if key == "before":
             for before in val:
-                if before not in deps:
-                    deps[before] = [container]
+                if before not in Dependencies:
+                    Dependencies[before] = [container]
                 else:
-                    deps[before].append(container)
+                    Dependencies[before].append(container)
 
         if key == "after":
-            if container not in deps:
-                deps[container] = val
+            if container not in Dependencies:
+                Dependencies[container] = val
             else:
                 for after in val:
-                    if after not in deps[container]:
-                        deps[container].append(after)
+                    if after not in Dependencies[container]:
+                        Dependencies[container].append(after)
 
 
 def process_container(container, config):
@@ -140,7 +148,7 @@ def process_container(container, config):
 
 
 def fill_container(container, config):
-    announce("Stacking "  + container)
+    announce("Filling "  + container + " container")
     if config.has_key('build'):
         tag = Project + "/" + container
         if config.has_key('tag'):
@@ -160,14 +168,20 @@ def fill_container(container, config):
             if os.path.isdir(dir):
                 shutil.rmtree(dir)
 
-            call(['git', 'clone', url, dir])
+            command = ['git', 'clone', url, dir]
+            note (" ".join(command))
+            call(command)
             target = dir
 
         mention("building " + container + " ( " + target + " ) " + " with tag '" + tag + "'")
-        call(['docker', 'build', '-t', tag, target])
+        command = ['docker', 'build', '-t', tag, target]
+        note (" ".join(command))
+        call(command)
     else:
         mention(container + " uses an image. Pulling " + get_value(config, 'image'))
-        call(['docker', 'pull', get_value(config, 'image')])
+        command = ['docker', 'pull', get_value(config, 'image')]
+        note (" ".join(command))
+        call(command)
 
 
 def wait_for_up(container, config):
@@ -184,6 +198,7 @@ def wait_for_up(container, config):
     ok = False
     while waited <= timeout:
         command = ["docker", "logs", Project + "_" + container]
+
         output = subprocess.check_output(command, stderr=subprocess.STDOUT)
         if output.find(logmsg) > 0:
             ok = True
@@ -212,12 +227,16 @@ def get_image(config):
 
 
 def stack_container(container, config):
-    announce("Loading " + container)
+    announce("Stacking " + container + " container")
     if config.has_key('run') and not config['run']:
         note ("container has 'run' key set to " + str(config['run']) + ", skipping")
         return
 
     command = ['docker', 'run', '-d', '--name', Project + "_" + container]
+
+    if config.has_key('options'):
+        for option in config['options']:
+            command = command + [parse_template(option)]
 
     if config.has_key('hostname'):
         command = command + ['--hostname', get_value(config, 'hostname')]
@@ -237,10 +256,6 @@ def stack_container(container, config):
         for envvar in config['environment']:
             command = command + ['-e', parse_template(envvar) + '=' + parse_template(config['environment'][envvar])]
 
-    if config.has_key('options'):
-        for option in config['options']:
-            command = command + [parse_template(option)]
-
     if config.has_key('link'):
         for link in config['link']:
             command = command + ["--link=" + Project + "_" + parse_template(link)]
@@ -258,19 +273,29 @@ def stack_container(container, config):
 
 
 def unstack_container(container):
-    announce("Unloading " + container)
-    call(['docker', 'rm', '--force', Project + '_' + container])
+    announce("Unstacking " + container + " container")
+    #command = ['docker', 'stop', '-t', str(UnstackTimeout),  Project + '_' + container]
+    command = ['docker', 'stop', Project + '_' + container]
+    note (" ".join(command))
+    call(command)
+
+    command = ['docker', 'rm', '--force', Project + '_' + container]
+    note (" ".join(command))
+    call(command)
 
 
 def container_status(container):
-    output = subprocess.check_output(['docker', 'inspect', '--format="{{.State.Status}}"', Project + '_' + container],
-                                     stderr=subprocess.STDOUT)
-    print(Project + '_' + container + ": " + output),
+    command = ['docker', 'inspect', '--format="{{.State.Status}}"', Project + '_' + container]
+    note(" ".join(command))
+    output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+    mention(Project + '_' + container + ": " + output),
 
 
-def remove_image(container, config):
-    announce("Removing image " + get_image(config))
-    call(['docker', 'rmi', get_image(config)])
+def empty_container(container, config):
+    announce("Emptying image " + container)
+    command = ['docker', 'rmi', get_image(config)]
+    note(" ".join(command))
+    call(command)
 
 
 def process_command(command_list):
@@ -320,23 +345,30 @@ def process_command(command_list):
             else:
                 container_status(container)
 
-    elif command == "rmi":
+    elif command == "empty":
         for container in which:
-            remove_image(container, config[container])
+            empty_container(container, config[container])
+
+    elif command == "refill":
+        for container in which:
+            empty_container(container, config[container])
+            fill_container(container, config[container])
+
 
     else:
         raise Exception("Unknown command '" + command + "'")
 
+    print
 
 def sort_containers():
     tups = list()
-    for dep in deps.keys():
-        tups.append((dep, deps[dep]))
+    for dep in Dependencies.keys():
+        tups.append((dep, Dependencies[dep]))
 
     s = topological_sort(tups)
 
     sorted = list();
-    for dummy in deps:
+    for dummy in Dependencies:
         sorted.append(s.next())
     return sorted
 
@@ -350,15 +382,15 @@ def find_yaml_location():
 
     raise (IOError("grua.yaml file not found"))
 
-
 def usage():
-    print "\tgrua\n\t----\n"
-    print "\tgrua fill\tBuild requisite containers"
-    print "\tgrua stack\tRun container composition"
-    print "\tgrua unstack\tStop and remove container composition"
-    print "\tgrua restack\tUnload and reload container composition"
-
     print
+    print "grua\n----\n"
+    print "   grua fill\t\tBuild requisite containers"
+    print "   grua stack\t\tRun container composition"
+    print "   grua unstack\t\tStop and remove container composition"
+    print "   grua restack\t\tUnload and reload container composition"
+    print "   grua empty\t\tDestroy all the related images"
+    print "   grua refill\t\tEmpty followed by fill - rebuild image(s)"
 
 
 yamlpath = find_yaml_location()
