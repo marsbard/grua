@@ -73,7 +73,7 @@ def topological_sort(source):
 
 
 def inspect_container(container, go_template):
-    command = ['docker', 'inspect', '-f', (" ").join(go_template), Project + "_" + container]
+    command = ['docker', 'inspect', '-f', (" ").join(go_template), get_container(container)]
 
     # note(" ".join(command))
     return subprocess.check_output(command, stderr=subprocess.STDOUT).strip()
@@ -197,7 +197,7 @@ def wait_for_up(container, config):
     waited = 0
     ok = False
     while waited <= timeout:
-        command = ["docker", "logs", Project + "_" + container]
+        command = ["docker", "logs", get_container(container)]
 
         output = subprocess.check_output(command, stderr=subprocess.STDOUT)
         if output.find(logmsg) > 0:
@@ -225,6 +225,8 @@ def get_image(config):
 
     return image
 
+def get_container(name):
+    return Project + "_" + name
 
 def stack_container(container, config):
     announce("Stacking " + container + " container")
@@ -232,7 +234,7 @@ def stack_container(container, config):
         note ("container has 'run' key set to " + str(config['run']) + ", skipping")
         return
 
-    command = ['docker', 'run', '-d', '--name', Project + "_" + container]
+    command = ['docker', 'run', '-d', '--name', get_container(container)]
 
     if config.has_key('options'):
         for option in config['options']:
@@ -258,7 +260,7 @@ def stack_container(container, config):
 
     if config.has_key('link'):
         for link in config['link']:
-            command = command + ["--link=" + Project + "_" + parse_template(link)]
+            command = command + ["--link=" + get_container(parse_template(link))]
 
     command.append(get_image(config))
 
@@ -274,21 +276,21 @@ def stack_container(container, config):
 
 def unstack_container(container):
     announce("Unstacking " + container + " container")
-    #command = ['docker', 'stop', '-t', str(UnstackTimeout),  Project + '_' + container]
-    command = ['docker', 'stop', Project + '_' + container]
+    #command = ['docker', 'stop', '-t', str(UnstackTimeout),  get_container(container)]
+    command = ['docker', 'stop', get_container(container)]
     note (" ".join(command))
     call(command)
 
-    command = ['docker', 'rm', '--force', Project + '_' + container]
+    command = ['docker', 'rm', '--force', get_container(container)]
     note (" ".join(command))
     call(command)
 
 
 def container_status(container):
-    command = ['docker', 'inspect', '--format="{{.State.Status}}"', Project + '_' + container]
+    command = ['docker', 'inspect', '--format="{{.State.Status}}"', get_container(container)]
     note(" ".join(command))
     output = subprocess.check_output(command, stderr=subprocess.STDOUT)
-    mention(Project + '_' + container + ": " + output),
+    mention(get_container(container) + ": " + output),
 
 
 def empty_container(container, config):
@@ -297,6 +299,14 @@ def empty_container(container, config):
     note(" ".join(command))
     call(command)
 
+
+def enter_container(which, commands):
+    run=["/bin/bash"]
+    if len(commands) > 0:
+        run = list(commands)
+    announce("Entering '" + which[0] + "' container and running: " + str(run))
+    command = ['docker', 'exec', '-ti', get_container(which[0])] + run
+    call(command)
 
 def process_command(command_list):
     commands = deque(command_list)
@@ -353,7 +363,12 @@ def process_command(command_list):
         for container in which:
             empty_container(container, config[container])
             fill_container(container, config[container])
+            
+    elif command == "enter":
+        if len(which) > 1:
+            raise(Exception("You may only enter one container at a time. Please provide container name"))
 
+        enter_container(which, commands)
 
     else:
         raise Exception("Unknown command '" + command + "'")
@@ -386,12 +401,15 @@ def usage():
     print
     print "grua\n----\n"
     print "   grua fill\t\tBuild requisite containers"
+    print "   grua empty\t\tDestroy all the related images"
+    print "   grua refill\t\tEmpty followed by fill - rebuild image(s)"
+    print
     print "   grua stack\t\tRun container composition"
     print "   grua unstack\t\tStop and remove container composition"
     print "   grua restack\t\tUnload and reload container composition"
-    print "   grua empty\t\tDestroy all the related images"
-    print "   grua refill\t\tEmpty followed by fill - rebuild image(s)"
-
+    print
+    print "   grua enter\t\tEnter container, run bash or opt args"
+    print
 
 yamlpath = find_yaml_location()
 
