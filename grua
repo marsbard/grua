@@ -99,19 +99,36 @@ def tpl_lookup(template):
             return BridgeIp
 
 
+# def parse_template(tpl):
+#     a1 = str(tpl).split("<%")
+#     out = ''
+#     for i in range(0, len(a1)):
+#         if i % 2 == 1:  # odd, replace template
+#             a2 = a1[i].split("%>")
+#             for j in range(0, len(a2)):
+#                 if j % 2 == 1:
+#                     out += a2[j]
+#                 else:
+#                     out += tpl_lookup(a2[j].strip())
+#         else:  # even, use directly
+#             out += a1[i]
+#
+#     return out
+
+
 def parse_template(tpl):
     a1 = str(tpl).split("<%")
-    out = ''
-    for i in range(0, len(a1)):
-        if i % 2 == 1:  # odd, replace template
-            a2 = a1[i].split("%>")
-            if len(a2) > 1:
-                out += tpl_lookup(a2[0].strip())
-                out += a2[1]
+    if len(a1) == 1:
+        return tpl
+    out = a1[0]
+    for i in range(1, len(a1)):
+        a2 = a1[i].split("%>")
+        for j in range(0, len(a2)):
+            if j % 2 == 1:
+                out += a2[j]
             else:
-                out += a2[0]
-        else:  # even, use directly
-            out += a1[i]
+                out += tpl_lookup(a2[j].strip())
+
 
     return out
 
@@ -411,6 +428,7 @@ def usage():
     print "   grua enter\t\tEnter container, run bash or opt args"
     print
 
+
 yamlpath = find_yaml_location()
 
 os.chdir(yamlpath)
@@ -430,3 +448,5 @@ if len(args) > 0:
     process_command(args)
 else:
     usage()
+
+
