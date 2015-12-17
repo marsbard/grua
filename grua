@@ -5,6 +5,8 @@ from collections import deque
 from subprocess import call
 
 Project = 'grua'  # gets replaced by 'project' value in 'global' from grua.yaml
+VolumePath = '/var/lib/grua/volumes' # replaced by 'global/volumepath' in grua.yaml
+
 UnstackTimeout = 15
 Dependencies = dict()
 
@@ -75,7 +77,7 @@ def topological_sort(source):
 def inspect_container(container, go_template):
     command = ['docker', 'inspect', '-f', (" ").join(go_template), get_container(container)]
 
-    # note(" ".join(command))
+    note(" ".join(command))
     return subprocess.check_output(command, stderr=subprocess.STDOUT).strip()
 
 def tpl_lookup(template):
@@ -265,7 +267,7 @@ def stack_container(container, config):
 
     if config.has_key('volumes'):
         for volumespec in config['volumes']:
-            command = command + ['-v', parse_template(volumespec)]
+            command = command + ['-v', VolumePath + "/" + Project + "/" + parse_template(volumespec)]
 
     if config.has_key('ports'):
         for portspec in config['ports']:
@@ -293,7 +295,6 @@ def stack_container(container, config):
 
 def unstack_container(container):
     announce("Unstacking " + container + " container")
-    #command = ['docker', 'stop', '-t', str(UnstackTimeout),  get_container(container)]
     command = ['docker', 'stop', get_container(container)]
     note (" ".join(command))
     call(command)
@@ -305,10 +306,17 @@ def unstack_container(container):
 
 def container_status(container):
     command = ['docker', 'inspect', '--format="{{.State.Status}}"', get_container(container)]
-    note(" ".join(command))
-    output = subprocess.check_output(command, stderr=subprocess.STDOUT)
-    mention(get_container(container) + ": " + output),
+    # note(" ".join(command))
+    try:
+        result = subprocess.check_output(command, stderr=subprocess.STDOUT)
+        if result == "running\n":
+            output = "^ stacked ^"
+        else:
+            output = result
+    except subprocess.CalledProcessError:
+        output = "_ unstacked _"
 
+    mention(container + ": " + output),
 
 def empty_container(container, config):
     announce("Emptying image " + container)
@@ -323,6 +331,7 @@ def enter_container(which, commands):
         run = list(commands)
     announce("Entering '" + which[0] + "' container and running: " + str(run))
     command = ['docker', 'exec', '-ti', get_container(which[0])] + run
+    note(" ".join(command))
     call(command)
 
 def process_command(command_list):
@@ -349,7 +358,7 @@ def process_command(command_list):
                 stack_container(container, config[container])
 
     elif command == 'unstack':
-        for container in which:
+        for container in reversed(which):
 
             if config[container].has_key('run') and not config[container]['run']:
                 pass
@@ -427,17 +436,22 @@ def usage():
     print
     print "   grua enter\t\tEnter container, run bash or opt args"
     print
+    print "   grua status\t\tShow status of containers"
+    print
 
 
 yamlpath = find_yaml_location()
 
 os.chdir(yamlpath)
 
+
 with open(yamlpath + "/grua.yaml", 'r') as stream:
     config = yaml.load(stream)
     if config.has_key('global'):
         if config['global'].has_key('project'):
             Project = config['global']['project']
+        if config['global'].has_key('VolumePath'):
+            VolumePath = config['global']['VolumePath']
     for container in config:
         process_container(container, config)
 
