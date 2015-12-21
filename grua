@@ -99,23 +99,9 @@ def tpl_lookup(template):
         words.pop(0)
         if key == 'BRIDGE_IP':
             return BridgeIp
+        if key == "PROJECT":
+            return Project
 
-
-# def parse_template(tpl):
-#     a1 = str(tpl).split("<%")
-#     out = ''
-#     for i in range(0, len(a1)):
-#         if i % 2 == 1:  # odd, replace template
-#             a2 = a1[i].split("%>")
-#             for j in range(0, len(a2)):
-#                 if j % 2 == 1:
-#                     out += a2[j]
-#                 else:
-#                     out += tpl_lookup(a2[j].strip())
-#         else:  # even, use directly
-#             out += a1[i]
-#
-#     return out
 
 
 def parse_template(tpl):
@@ -429,7 +415,6 @@ def find_yaml_location():
     raise (IOError("grua.yaml file not found"))
 
 def usage():
-    print
     print "                grua\n                ----"
     print "              //\\  ___"
     print "              Y  \\/_/=|"
@@ -441,7 +426,7 @@ def usage():
     print
     print "   grua stack\t\tRun container composition"
     print "   grua unstack\t\tStop and remove container composition"
-    print "   grua restack\t\tUnload and reload container composition"
+    print "   grua restack\t\tUnstack and restack container composition"
     print
     print "   grua enter\t\tEnter container, run bash or opt args"
     print
