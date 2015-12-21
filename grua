@@ -333,6 +333,13 @@ def edit_yaml():
     call(command)
 
 
+def edit_dockerfile(container):
+    announce("Editing dockerfile for " + container)
+    command = [os.environ['EDITOR'], yamlpath + '/' + container + "/Dockerfile"]
+    note(" ".join(command))
+    call(command)
+
+
 def process_command(command_list):
     commands = deque(command_list)
 
@@ -382,10 +389,12 @@ def process_command(command_list):
 
     elif command == "empty":
         for container in reversed(which):
+            unstack_container(container)
             empty_container(container, config[container])
 
     elif command == "refill":
         for container in which:
+            unstack_container(container)
             empty_container(container, config[container])
             fill_container(container, config[container])
             
@@ -397,6 +406,11 @@ def process_command(command_list):
 
     elif command == "edit":
         edit_yaml()
+
+    elif command == "editd":
+        for container in which:
+            if config[container].has_key('build'):
+                edit_dockerfile(container)
 
     else:
         raise Exception("Unknown command '" + command + "'")
@@ -442,6 +456,7 @@ def usage():
     print "   grua enter\t\tEnter container, run bash or opt args"
     print "   grua status\t\tShow status of containers"
     print "   grua edit\t\tEdit grua.yaml from within subfolder"
+    print "   grua editd\t\tEdit Dockerfile(s) from within subfolder"
     print
     print
 
