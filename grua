@@ -325,6 +325,14 @@ def enter_container(which, commands):
     note(" ".join(command))
     call(command)
 
+
+def edit_yaml():
+    announce("Editing " + yamlpath)
+    command = [os.environ['EDITOR'], yamlpath + '/grua.yaml']
+    note(" ".join(command))
+    call(command)
+
+
 def process_command(command_list):
     commands = deque(command_list)
 
@@ -387,6 +395,9 @@ def process_command(command_list):
 
         enter_container(which, commands)
 
+    elif command == "edit":
+        edit_yaml()
+
     else:
         raise Exception("Unknown command '" + command + "'")
 
@@ -429,8 +440,9 @@ def usage():
     print "   grua restack\t\tUnstack and restack container composition"
     print
     print "   grua enter\t\tEnter container, run bash or opt args"
-    print
     print "   grua status\t\tShow status of containers"
+    print "   grua edit\t\tEdit grua.yaml from within subfolder"
+    print
     print
 
 args = sys.argv[1:]
