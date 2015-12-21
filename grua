@@ -433,6 +433,9 @@ def usage():
     print "   grua status\t\tShow status of containers"
     print
 
+args = sys.argv[1:]
+if len(args)==0:
+    usage()
 
 yamlpath = find_yaml_location()
 
@@ -450,11 +453,8 @@ with open(yamlpath + "/grua.yaml", 'r') as stream:
         process_container(container, config)
 
 sorted_run_deps = sort_containers()
-args = sys.argv[1:]
 
 if len(args) > 0:
     process_command(args)
-else:
-    usage()
 
 
