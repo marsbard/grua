@@ -258,7 +258,7 @@ def stack_container(container, config):
             if volumespec.startswith("/"):
                 command = command + ['-v', parse_template(volumespec)]
             else:
-                command = command + ['-v', VolumePath + "/" + Project + "/" + parse_template(volumespec)]
+                command = command + ['-v', VolumePath + "/" + Project + "/" + container + "/" + parse_template(volumespec)]
 
     if config.has_key('ports'):
         for portspec in config['ports']:
