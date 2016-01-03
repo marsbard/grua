@@ -376,4 +376,37 @@ solr:
 ```
 
 
-### 
+### __grua__ command line
+
+#### without arguments
+
+```
+$ grua
+                grua
+                ----
+              //\  ___
+              Y  \/_/=|
+             _L  ((|_L_|
+            (/\)(__(____) cjr
+
+   grua fill		Build requisite containers
+   grua empty		Destroy all the related images
+   grua refill		Empty followed by fill - rebuild image(s)
+
+   grua stack		Run container composition
+   grua unstack		Stop and remove container composition
+   grua restack		Unstack and restack container composition
+
+   grua enter		Enter container, run bash or opt args
+   grua status		Show status of containers
+   grua edit		Edit grua.yaml from within subfolder
+   grua editd		Edit Dockerfile(s) from within subfolder
+
+   grua mode		Set operating mode
+
+\> grua mode is currently: noisy, destructive
+
+```
+
+#### fill
+
