@@ -61,7 +61,7 @@ example two projects with the same name having a container called 'mysql' would 
 their databases in the same physical place on your hard drive. It should be obvious that this is a bad idea.
 (In this example I am assuming the same mysql config which exposes the same volumes).
 
-* '''volumepath'''
+* __volumepath__
 
 By default, this is `/var/lib/grua/volumes` but you can set a different path here, if for example you want
 all volumes to be on an nfs mount.
@@ -80,7 +80,7 @@ path is used (SEE VOLUMES)
 
 ### Container configuration
 
-* '''build''' (value)
+* __build__ (value)
 
 You must have at least one of `build` or `image` in your configuration. If you have `build`, it refers
 to a folder beneath the location of `grua.yaml` which should contain a Dockerfile and any other resources
@@ -106,7 +106,7 @@ base:
 Also note here that 'before' was specified. Normally this specifies runtime ordering but it also specifies
 build ordering when `run: false` is in effect
 
-* '''image''' (value)
+* __image__ (value)
 
 You must have at least one of `build` or `image` in your configuration. If you have `image`, it refers
 to an image either available on the system or else in the default registry.
