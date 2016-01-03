@@ -304,6 +304,7 @@ You may specify:
 > Runs `docker logs <grua container name>"` continuously, once per second, until either the specified
 > message has been found (uses python `<string>.find()`) or else the timeout has been reached.
 
+or
 
 > <a name="attrs-stack-upwhen-sleep">__sleep__ (value)</a>
 >
