@@ -107,11 +107,11 @@ as well as adding a tag name to refer to the image, e.g.:
 
 ```
 base:
-  build: base
-	tag: marsbard/base
-	run: false
-	before: 
-		- tomcat
+    build: base
+    tag: marsbard/base
+    run: false
+    before: 
+        - tomcat
 ```
 Also note here that 'before' was specified. Normally this specifies runtime ordering but it also specifies
 build ordering when `run: false` is in effect. In this case, the `tomcat` image is built using 
@@ -139,8 +139,10 @@ If you specify both `build` and `image` attributes, then `build` will take prefe
 * <a name="attrs-stack-run">__run__ (boolean)</a>
 
 If set to `true` then this will be a container to be run. If set to `false` then just an 
-image will be created. In this case you probably want to list the container names that will
-require this image using a `before` attribute, see example in [build](#attrs-fill-build)
+image will be created. In the latter case you probably want to list the container names that will
+require this image using a `before` attribute, see example base configuration in [build](#attrs-fill-build),
+which specifies that it must be built before the tomcat container. In this case, the tomcat container
+has `FROM marsbard/base" at the top of its Dockerfile.
 
 By default this is `true` so you only need to specify it when you don't want the image to be
 run as a container, e.g.:
