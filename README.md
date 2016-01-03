@@ -33,21 +33,21 @@ wait for the log message "consul: New leader elected: consul" before proceeding:
 
 ```
 consul:
-  build: consul
-	upwhen: 
-		logmsg: "consul: New leader elected: consul"
-	options:
-		- "--expose=8300"
-		- "--expose=8500"
-		- "--expose=53"
-	ports:
-		- 8300:8300
-		- 8500:8500
-		- "53:53"
-	volumes:
-		- config:/config
-		- data:/data
-	command: "-data-dir=/data -bootstrap-expect 1 -client 0.0.0.0"
+    build: consul
+    upwhen: 
+        logmsg: "consul: New leader elected: consul"
+    options:
+        - "--expose=8300"
+        - "--expose=8500"
+        - "--expose=53"
+    ports:
+        - 8300:8300
+        - 8500:8500
+        - "53:53"
+    volumes:
+        - config:/config
+        - data:/data
+    command: "-data-dir=/data -bootstrap-expect 1 -client 0.0.0.0"
 
 ```
 
@@ -82,8 +82,8 @@ global:
 ```
 
 Any volumes you define which do not have a leading slash as part of the local location
-will be placed relative to this volumepath, but when a leading `/" is used then the absolute 
-path is used (SEE VOLUMES)
+will be placed relative to this volumepath, but when a leading `/` is found then the absolute 
+path is used ([see volumes](#attrs-stack-volumes)).
 
 
 ### Container configuration
