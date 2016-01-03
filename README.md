@@ -18,7 +18,7 @@ the previous one, you can wait for a specific message in the log output before s
 can give you confidence that each dependency is ready before starting your main application.
 
 Additionally you get the capability to use any data you can find from `docker inspect` on an already 
-running container within the configuration of another container (typically this looks like:
+running container within the configuration of another container, typically that looks like this:
 
 ```
 postfix:
@@ -26,7 +26,6 @@ postfix:
   dns: <% INSPECT consul {{ .NetworkSettings.IPAddress }} %>
 ```
 
-)
 
 ## The grua metaphor
 
