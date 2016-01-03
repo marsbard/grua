@@ -1,3 +1,5 @@
 build
+projectname.egg-info
+.idea
 dist
 *.pyc
