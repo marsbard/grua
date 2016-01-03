@@ -276,12 +276,9 @@ alfresco:
     - repo/data:/data
     - /tmp:/tmp
 ```
-In the above example, if [volumepath](#global-volumepath) is set to its default value, the first volume 
-will be located at 
-
-`/var/lib/grua/volumes/alf/repo/data` 
-
-on the host, while the second volume, `/tmp` on the container will be mapped to the `/tmp` directory of the host.
+In the above example, if [volumepath](#global-volumepath) is set to its default value, the first volume, 
+`/data` in the container, will be located at  `/var/lib/grua/volumes/alf/repo/data` on the host, while 
+the second volume, `/tmp` on the container will be mapped to the `/tmp` directory of the host.
 
 
 * <a name="attrs-stack-ports">__ports__ (list)</a>
