@@ -82,7 +82,7 @@ global:
 ```
 
 Any volumes you define which do not have a leading slash as part of the local location
-will be placed relative to this volumepath, but when a leading `/" is used (or "./") then the absolute 
+will be placed relative to this volumepath, but when a leading `/" is used then the absolute 
 path is used (SEE VOLUMES)
 
 
@@ -171,3 +171,58 @@ consul:
     - "--expose=8500"
     - "--expose=53"
 ```
+
+The options list will be concatenated in the order that it is specified and passed to `docker run`
+
+* <a name="attrs-stack-hostname">__hostname__ (value)</a>
+
+Set the hostname of this container. If this is not explicitly set then this will be the name of the 
+container, which would make the following example, while illustrative, redundant.
+
+``` 
+mysql:
+  hostname: mysql
+```
+
+Equivalent to `docker run -h`
+
+* <a name="attrs-stack-dns">__dns__ (value)</a>
+
+Set the DNS server the container should use to resolve domain queries.
+
+It can be useful to use this in conjuction with (SEE GRUA TEMPLATING) to determine the address of a 
+particular container that will provide you with DNS services for your containers. For example in a 
+setup using consul and registrator, you could specify something like this:
+
+```
+postfix:
+  hostname: postfix
+  dns: <% INSPECT consul {{ .NetworkSettings.IPAddress }} %>
+```
+
+Equivalent to `docker run --dns <address>`
+
+* <a name="attrs-stack-volumes">__volumes__ (list)</a>
+
+These work slightly differently to how docker volumes are specified normally. As usual there is a 
+host location for the volume, and a location within the container, specified like 
+`<host location>:<container location>`. But when `host location` does __not__ start with a `/` 
+character, the location of the volume on the host will be relative to [volumepath](#global-volumepath)
+and it will include the global [project](#global-project) attribute in its path.
+
+For example: 
+```
+global:
+  project: alf
+alfresco:
+  volumes:
+    - repo/data:/data
+    - /tmp:/tmp
+```
+In the above example, if [volumepath](#global-volumepath) is set to its default value, the first volume 
+will be located at `/var/lib/grua/volumes/alf/repo/data` while the second volume, `/tmp` on the
+container will be mapped to the `/tmp` directory of the host.
+
+When `host location` __does__ start with `/`, the location of the volume on the host will be absolute.
+
+* <a name="attrs-stack-ports">__ports__ (list)</a>
