@@ -104,7 +104,9 @@ base:
 		- tomcat
 ```
 Also note here that 'before' was specified. Normally this specifies runtime ordering but it also specifies
-build ordering when `run: false` is in effect
+build ordering when `run: false` is in effect. In this case, the `tomcat` image is built using 
+`FROM marsbard/base` in the Dockerfile, so it is necessary to build `marsbard/base` first before 
+building the `tomcat` image.
 
 * __image__ (value)
 
