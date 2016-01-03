@@ -404,6 +404,17 @@ def process_command(command_list):
 
         enter_container(which, commands)
 
+    elif command == "refstk":
+        if len(which) > 1:
+            raise(Exception("You may only refstk one container at a time. Please provide container name"))
+
+        container = which[0]
+
+        unstack_container(container)
+        empty_container(container, config[container])
+        fill_container(container, config[container])
+        stack_container(container, config[container])
+
     elif command == "edit":
         edit_yaml()
 
