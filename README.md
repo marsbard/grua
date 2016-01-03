@@ -37,7 +37,7 @@ SEE COMMAND_LINE
 
 ## The configuration file, `grua.yaml`
 
-The configuration file is a YAML file. In general each top level entry in the file specifies a container 
+The configuration file is a YAML file. In general each top level attribute in the file specifies a container 
 to be built, for example, here is a container that will create a consul container and when in use, will
 wait for the log message `consul: New leader elected: consul` before proceeding:
 
@@ -67,7 +67,7 @@ that isn't supplied, you can use the `options:` stanza as shown above and [also 
 
 ### Global parameters
 
-There is one top level section that does not represent a container, and that is the 'global' section.
+There is one top level attribute that does not represent a container, and that is the 'global' section.
 It can contain the following configuration items:
 
 * <a name="global-project">__project__</a>
@@ -190,11 +190,11 @@ If you specify both `build` and `image` attributes, then `build` will take prefe
 
 * <a name="attrs-stack-run">__run__ (boolean)</a>
 
-If set to `true` then this will be a container to be run. If set to `false` then just an 
+confusing ~~If set to `true` then this will be a container to be run. If set to `false` then just an 
 image will be created. In the latter case you probably want to list the container names that will
 require this image using a `before` attribute, see example base configuration in [build](#attrs-fill-build),
 which specifies that it must be built before the tomcat container. In that case, the tomcat container
-has `FROM marsbard/base` at the top of its Dockerfile.
+has `FROM marsbard/base` at the top of its Dockerfile.~~
 
 By default this is `true` so you only need to specify it when you don't want the image to be
 run as a container, e.g.:
