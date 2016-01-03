@@ -90,14 +90,15 @@ path is used ([see volumes](#attrs-stack-volumes)).
 
 #### Dependency ordering attributes
 
-* <a name="attrs-deps-before">__before__ (value)</a>
+* <a name="attrs-deps-before">__before__ (list)</a>
 
 Specify that this container must be stacked (or filled) before some other container(s), for example:
 
 ```
 share:
   build: share
-  before: solr
+  before: 
+    - solr
 ```
 In this instance, the `share` container will be stacked before the `solr` container is, and also
 when the underlying images are created they respect the same order.
@@ -105,7 +106,7 @@ when the underlying images are created they respect the same order.
 When unstacking or emptying the containers, the ordering is respected in reverse. In the example shown
 above, the `solr` container would be unstacked before the `share` container.
 
-* <a name="attrs-deps-after">__after__ (value)</a>
+* <a name="attrs-deps-after">__after__ (list)</a>
 
 Specify that this container must be stacked or filled after some other container(s), e.g.
 ```
@@ -127,7 +128,7 @@ registrator:
 ```
 
 Here the `registrator` container will be stacked after the `consul` container. You can also see
-that registrator is scheduled to start before several containers that depend on it.
+that `registrator` is scheduled to start before several containers that depend on it.
 
 #### Attributes relevant to `grua fill`
 
