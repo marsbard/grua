@@ -299,20 +299,18 @@ been seen, or until a sleep period has passed.
 
 You may specify:
 
-*
-  * <a name-"attrs-stack-upwhen-logmsg">__logmsg__ (value)</a>
 
-Runs `docker logs <grua container name>"` continuously, once per second, until either the specified
-message has been found (uses python `<string>.find()`) or else the timeout has been reached.
+> <a name-"attrs-stack-upwhen-logmsg">__logmsg__ (value)</a>
+> Runs `docker logs <grua container name>"` continuously, once per second, until either the specified
+> message has been found (uses python `<string>.find()`) or else the timeout has been reached.
 
-*
-  * <a name="attrs-stack-upwhen-sleep">__sleep__ (value)</a>
-
-Sleep for the specified number of seconds. Sleeping is always likely to be fragile and is discouraged.
-
-If sleep is specified with any other `upwhen` directive, then the sleep will occur after the other 
-directives have been satisfied. For example if both `logmsg` and `sleep` are specified then the 
-sleep will occur after the `logmsg` has been seen.
+> <a name="attrs-stack-upwhen-sleep">__sleep__ (value)</a>
+>
+> Sleep for the specified number of seconds. Sleeping is always likely to be fragile and is discouraged.
+> 
+> If sleep is specified with any other `upwhen` directive, then the sleep will occur after the other 
+> directives have been satisfied. For example if both `logmsg` and `sleep` are specified then the 
+> sleep will occur after the `logmsg` has been seen.
 
 ```
 mysql:
