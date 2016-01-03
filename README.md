@@ -155,7 +155,7 @@ tomcat:
 * <a name="attrs-stack-options">__options__ (list)</a>
 
 Any docker options for which grua does not provide a replacement may be provided here. _In fact
-options for which grua _does_ provide a replacement may also be provided here but be aware that
+options for which grua does provide a replacement may also be provided here but be aware that
 grua names things with the `project` attribute from the [global](#global-parameters) section, for 
 example, if the project is `foo`, and the container is defined as `mysql` within `grua.yaml`, then
 the container that docker will work with will be named `foo_mysql`_
