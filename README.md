@@ -29,9 +29,9 @@ postfix:
 
 ## The grua metaphor
 
-'Grua' is Spanish for 'crane'. The metaphor used in `grua` extends that to imagine a crane on a dockside
-stacking containers into a composition (or, indeed, a stack). But it also uses a 'fill' metaphor to describe
-'filling' a container with an image.
+'Grua' is Spanish for 'crane'. The metaphor used in `grua` extends tje docker metaphor to imagine a crane 
+on a dockside stacking containers into a composition (or, indeed, a stack). But it also uses a 'fill' 
+metaphor to describe 'filling' a container with an image.
 
 SEE COMMAND_LINE
 
