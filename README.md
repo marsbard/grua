@@ -63,7 +63,7 @@ consul:
 
 Please be sure to note that if you are used to docker-compose, various things will be different, and in 
 particular I have not attempted to model the whole docker command line interface, if you need something 
-that isn't supplied, you can use the `options:` stanza as shown above.
+that isn't supplied, you can use the `options:` stanza as shown above and [also here](#attrs-fill-options).
 
 ### Global parameters
 
