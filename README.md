@@ -90,7 +90,7 @@ path is used (SEE VOLUMES)
 
 #### Attributes relevant to `grua fill`
 
-* [__build__ (value)](#attrs-fill-build)
+* <a name="attrs-fill-build">__build__ (value)</a>
 
 You must have at least one of `build` or `image` in your configuration. If you have `build`, it refers
 to a folder beneath the location of `grua.yaml` which should contain a Dockerfile and any other resources
@@ -140,4 +140,4 @@ If you specify both `build` and `image` attributes, then `build` will take prefe
 
 If set to `true` then this will be a container to be run. If set to `false` then just an 
 image will be created. In this case you probably want to list the container names that will
-require this image using a `before` attribute, see 
+require this image using a `before` attribute, see [build](#attrs-fill-build)
