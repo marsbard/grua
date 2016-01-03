@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import shutil, errno, yaml, os.path, sys, time, subprocess, shlex, re
+import shutil, os.path, time, subprocess, shlex, re
 from collections import deque
 from subprocess import call
 
@@ -150,10 +150,6 @@ def calc_deps(container, config):
                 for after in val:
                     if after not in Dependencies[container]:
                         Dependencies[container].append(after)
-
-
-def process_container(container, config):
-    calc_deps(container, config)
 
 
 def fill_container(container, config):
@@ -535,40 +531,6 @@ def usage():
     print "> grua mode is currently: " + Mode['noisy'] + ", " + Mode['destructive'] 
     print 
 
-args = sys.argv[1:]
 
-yamlpath = find_yaml_location()
-
-os.chdir(yamlpath)
-
-
-with open(yamlpath + "/grua.yaml", 'r') as stream:
-    config = yaml.load(stream)
-    if config.has_key('global'):
-        if config['global'].has_key('project'):
-            Project = config['global']['project']
-        if config['global'].has_key('VolumePath'):
-            VolumePath = config['global']['VolumePath']
-    for container in config:
-        process_container(container, config)
-
-
-# set up configuration path
-try:
-    os.makedirs(ConfigPath + "/" + Project)
-except OSError as exc: # Python >2.5
-    if exc.errno == errno.EEXIST and os.path.isdir(ConfigPath + "/" + Project):
-        pass
-    else: raise
-
-
-sorted_run_deps = sort_containers()
-
-Mode = get_mode()
-
-if len(args)==0:
-    usage()
-else:
-    process_command(args)
 
 
