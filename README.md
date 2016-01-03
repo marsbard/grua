@@ -88,6 +88,44 @@ path is used ([see volumes](#attrs-stack-volumes)).
 
 ### Container configuration
 
+#### Dependency ordering attributes
+
+* <a name="attrs-deps-before">__before__ (value)</a>
+
+Specify that this container must be stacked (or filled) before some other container(s), for example:
+
+```
+share:
+  build: share
+  before: solr
+```
+In this instance, the `share` container will be stacked before the `solr` container is, and also
+when the underlying images are created they respect the same order.
+
+When unstacking or emptying the containers, the ordering is respected in reverse. In the example shown
+above, the `solr` container would be unstacked before the `share` container.
+
+* <a name="attrs-deps-after">__after__ (value)</a>
+
+Specify that this container must be stacked or filled after some other container(s), e.g.
+```
+registrator:
+  image: gliderlabs/registrator:latest
+  after:
+    - consul
+  before:
+    - postfix
+    - alfresco
+    - solr
+    - share
+    - mysql
+  link:
+    - consul
+  volumes:
+    - /var/run/docker.sock:/tmp/docker.sock
+
+```
+
 #### Attributes relevant to `grua fill`
 
 * <a name="attrs-fill-build">__build__ (value)</a>
@@ -301,6 +339,7 @@ You may specify:
 
 
 > <a name-"attrs-stack-upwhen-logmsg">__logmsg__ (value)</a>
+>
 > Runs `docker logs <grua container name>"` continuously, once per second, until either the specified
 > message has been found (uses python `<string>.find()`) or else the timeout has been reached.
 
