@@ -281,8 +281,6 @@ Example:
 ```
 solr:
   build: solr
-  options:
-    - "--expose=8443"
   ports:
     - "8443:8443"
 ```
@@ -297,12 +295,6 @@ mysql:
     MYSQL_USER: alfred
     MYSQL_PASSWORD: wutwut
     MYSQL_ROOT_PASSWORD: wutwutwut
-  dns: <% INSPECT consul {{ .NetworkSettings.IPAddress }} %>
-  image: mysql:5.6
-  options:
-    - "--expose=3306"
-  volumes:
-    - alfresco/mysql:/var/lib/mysql
 ```
 
 * <a name="attrs-stack-link">__link__ (list)</a>
@@ -314,7 +306,6 @@ the container name.
 global:
   project: alf
 registrator:
-  image: gliderlabs/registrator:latest
   link:
     - consul
 ```
@@ -328,7 +319,6 @@ the last argument in a call such as `docker run -ti some/image /path/in/containe
 
 ```
 registrator:
-  image: gliderlabs/registrator:latest
   command: "-internal consul://consul:8500"
 ```
 
