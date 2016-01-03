@@ -282,6 +282,12 @@ In actual fact, from docker's point of view, in this case the container that is 
 Equivalent to the `CMD` directive in the Dockerfile, and also to the command that you would append as 
 the last argument in a call such as `docker run -ti some/image /path/in/container/to/command`.
 
+```
+registrator:
+  image: gliderlabs/registrator:latest
+  command: "-internal consul://consul:8500"
+```
+
 This will override the `CMD` directive from the Dockerfile
 
 * <a name="attrs-stack-upwhen">__upwhen__ (hash)</a>
