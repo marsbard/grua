@@ -1,5 +1,5 @@
 # grua
-A simple docker composition tool with runtime dependencies between containers. 'Grua' is Spanish for 'crane'
+An opinionated docker composition tool with runtime dependencies between containers.
 
 ![](https://openclipart.org/image/200px/svg_to_png/176279/shipbuilding-crane-1.png)
 
@@ -16,6 +16,14 @@ So `grua` adds explicit dependency ordering to container composition, by use of 
 in container configuration. Furthermore, rather than just firing the next container as soon as docker has started
 the previous one, you can wait for a specific message in the log output before starting the next container. This 
 can give you confidence that each dependency is ready before starting your main application.
+
+## The grua metaphor
+
+'Grua' is Spanish for 'crane'. The metaphor used in `grua` extends that to imagine a crane on a dockside
+stacking containers into a composition (or, indeed, a stack). But it also uses a 'fill' metaphor to describe
+'filling' a container with an image.
+
+SEE COMMAND_LINE
 
 ## The configuration file, grua.yaml
 
@@ -47,7 +55,7 @@ Please be sure to note that if you are used to docker-compose, various things wi
 particular I have not attempted to model the whole docker command line interface, if you need something 
 that isn't supplied, you can use the 'options:' stanza as shown above.
 
-### global parameters
+### Global parameters
 
 There is one top level section that does not represent a container, and that is the 'global' section.
 It can contain the following configuration items:
@@ -80,6 +88,8 @@ path is used (SEE VOLUMES)
 
 ### Container configuration
 
+#### Attributes relevant to `grua fill`
+
 * __build__ (value)
 
 You must have at least one of `build` or `image` in your configuration. If you have `build`, it refers
@@ -108,7 +118,21 @@ build ordering when `run: false` is in effect. In this case, the `tomcat` image 
 `FROM marsbard/base` in the Dockerfile, so it is necessary to build `marsbard/base` first before 
 building the `tomcat` image.
 
+If you specify both `build` and `image` attributes, then `build` will take preference.
+
 * __image__ (value)
 
 You must have at least one of `build` or `image` in your configuration. If you have `image`, it refers
 to an image either available on the system or else in the default registry.
+
+You can also include a tag on an image value. For example:
+
+```
+mysql:
+  image: mysql:5.6
+```
+
+If you specify both `build` and `image` attributes, then `build` will take preference.
+
+#### Attributes relevant to `grua stack`
+
