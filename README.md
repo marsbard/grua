@@ -210,6 +210,8 @@ host location for the volume, and a location within the container, specified lik
 character, the location of the volume on the host will be relative to [volumepath](#global-volumepath)
 and it will include the global [project](#global-project) attribute in its path.
 
+When `host location` __does__ start with `/`, the location of the volume on the host will be absolute.
+
 For example: 
 ```
 global:
@@ -224,8 +226,87 @@ will be located at
 
 `/var/lib/grua/volumes/alf/repo/data` 
 
-while the second volume, `/tmp` on the container will be mapped to the `/tmp` directory of the host.
+on the host, while the second volume, `/tmp` on the container will be mapped to the `/tmp` directory of the host.
 
-When `host location` __does__ start with `/`, the location of the volume on the host will be absolute.
 
 * <a name="attrs-stack-ports">__ports__ (list)</a>
+
+Each element of this list will be transformed to a `-p` argument to docker.
+
+Example:
+```
+solr:
+  build: solr
+  options:
+    - "--expose=8443"
+  ports:
+    - "8443:8443"
+```
+
+* <a name="attrs-stack-environment">__environment__ (hash)</a>
+
+A hash of variable names and values, for example:
+```
+mysql:
+  environment:
+    MYSQL_DATABASE: alfresco
+    MYSQL_USER: alfred
+    MYSQL_PASSWORD: wutwut
+    MYSQL_ROOT_PASSWORD: wutwutwut
+  dns: <% INSPECT consul {{ .NetworkSettings.IPAddress }} %>
+  image: mysql:5.6
+  options:
+    - "--expose=3306"
+  volumes:
+    - alfresco/mysql:/var/lib/mysql
+```
+
+* <a name="attrs-stack-link">__link__ (list)</a>
+
+Equivalent to `--link=<container name>` but it prepends the value of [project](#global-project) to
+the container name.
+
+* <a name="attrs-stack-command">__command__ (value)</a>
+
+Equivalent to the `CMD` directive in the Dockerfile, and also to the command that you would append as 
+the last argument in a call such as `docker run -ti some/image /path/in/container/to/command`.
+
+This will override the `CMD` directive from the Dockerfile
+
+* <a name="attrs-stack-upwhen">__upwhen__ (hash)</a>
+
+This attribute allows you to delay the stacking of the __next__ container until some log message has 
+been seen, or until a sleep period has passed. 
+
+You may specify:
+
+** <a name-"attrs-stack-upwhen-logmsg">__logmsg__ (value)</a>
+
+Runs `docker logs <grua container name>"` continuously, once per second, until either the specified
+message has been found (uses python `<string>.find()`) or else the timeout has been reached.
+
+** <a name="attrs-stack-upwhen-sleep">__sleep__ (value)</a>
+
+Sleep for the specified number of seconds. Sleeping is always likely to be fragile and is discouraged.
+
+If sleep is specified with any other `upwhen` directive, then the sleep will occur after the other 
+directives have been satisfied. For example if both `logmsg` and `sleep` are specified then the 
+sleep will occur after the `logmsg` has been seen.
+
+```
+mysql:
+  upwhen:
+    logmsg: "mysqld: ready for connections"
+    sleep: 2
+```
+
+By default grua will wait up to 30 seconds for the requirements to be met before throwing an exception 
+but you can set a timeout, e.g.:
+
+```
+solr:
+  upwhen:
+    logmsg: "INFO: Server startup in "
+    timeout: 60
+```
+
