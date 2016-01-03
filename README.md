@@ -220,8 +220,11 @@ alfresco:
     - /tmp:/tmp
 ```
 In the above example, if [volumepath](#global-volumepath) is set to its default value, the first volume 
-will be located at `/var/lib/grua/volumes/alf/repo/data` while the second volume, `/tmp` on the
-container will be mapped to the `/tmp` directory of the host.
+will be located at 
+
+`/var/lib/grua/volumes/alf/repo/data` 
+
+while the second volume, `/tmp` on the container will be mapped to the `/tmp` directory of the host.
 
 When `host location` __does__ start with `/`, the location of the volume on the host will be absolute.
 
