@@ -1,5 +1,5 @@
 # grua
-An opinionated docker composition tool with runtime dependencies between containers.
+An opinionated declarative docker composition tool with runtime dependencies between containers.
 
 ![](https://openclipart.org/image/200px/svg_to_png/176279/shipbuilding-crane-1.png)
 
@@ -35,7 +35,7 @@ metaphor to describe 'filling' a container with an image.
 
 SEE COMMAND_LINE
 
-## The configuration file, grua.yaml
+## The configuration file, `grua.yaml`
 
 The configuration file is a YAML file. In general each top level entry in the file specifies a container 
 to be built, for example, here is a container that will create a consul container and when in use, will
@@ -278,7 +278,7 @@ alfresco:
 ```
 In the above example, if [volumepath](#global-volumepath) is set to its default value, the first volume, 
 `/data` in the container, will be located at  `/var/lib/grua/volumes/alf/repo/data` on the host, while 
-the second volume, `/tmp` on the container will be mapped to the `/tmp` directory of the host.
+the second volume, `/tmp` in the container will be mapped to the `/tmp` directory of the host.
 
 
 * <a name="attrs-stack-ports">__ports__ (list)</a>
@@ -304,6 +304,9 @@ mysql:
     MYSQL_PASSWORD: wutwut
     MYSQL_ROOT_PASSWORD: wutwutwut
 ```
+
+Equivalent to the `-e` switch to `docker run`, this will make each element of the environment hash
+available in the environment of the relevant container.
 
 * <a name="attrs-stack-link">__link__ (list)</a>
 
@@ -334,7 +337,7 @@ This will override the `CMD` directive from the Dockerfile
 
 * <a name="attrs-stack-upwhen">__upwhen__ (hash)</a>
 
-This attribute allows you to delay the stacking of the __next__ container until some log message has 
+This attribute allows you to delay the stacking of the following container until some log message has 
 been seen, or until a sleep period has passed. 
 
 You may specify:
@@ -372,3 +375,5 @@ solr:
     timeout: 60
 ```
 
+
+### 
