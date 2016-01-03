@@ -1,24 +1,28 @@
 #!/usr/bin/env python
-import shutil
-import yaml, os.path, sys, time, subprocess, shlex, re
+import shutil, errno, yaml, os.path, sys, time, subprocess, shlex, re
 from collections import deque
 from subprocess import call
 
 Project = 'grua'  # gets replaced by 'project' value in 'global' from grua.yaml
-VolumePath = '/var/lib/grua/volumes' # replaced by 'global/volumepath' in grua.yaml
+GruaBase = '/var/lib/grua'
+VolumePath = GruaBase + '/volumes' # replaced by 'global/volumepath' in grua.yaml
+ConfigPath = os.environ["HOME"] + "/.grua"
 
 UnstackTimeout = 15
 Dependencies = dict()
 
 
 def announce(msg):
-    print "\n>>> " + msg + "\n"
+    if Mode['noisy'] == 'noisy':
+        print "\n>>> " + msg + "\n"
 
 def mention(msg):
-    print ">> " + msg
+    if Mode['noisy'] == 'noisy':
+        print ">> " + msg
 
 def note(msg):
-    print "> " + msg
+    if Mode['noisy'] == 'noisy':
+        print "> " + msg
 
 
 
@@ -340,7 +344,13 @@ def edit_dockerfile(container):
     call(command)
 
 
+def print_mode():
+    Mode = get_mode()
+    print Mode['noisy'] + ", " + Mode['destructive']
+
 def process_command(command_list):
+    Mode = get_mode()
+
     commands = deque(command_list)
 
     command = commands.popleft()
@@ -348,10 +358,10 @@ def process_command(command_list):
     if len(commands) > 0:
         which = [commands.popleft()]
     else:
-
         deps = sorted_run_deps
         deps.remove('global')
         which = deps
+
     if command == 'fill':
         for container in which:
             fill_container(container, config[container])
@@ -395,8 +405,9 @@ def process_command(command_list):
     elif command == "refill":
         for container in which:
             unstack_container(container)
+        if Mode['destructive']=='destructive':
             empty_container(container, config[container])
-            fill_container(container, config[container])
+        fill_container(container, config[container])
             
     elif command == "enter":
         if len(which) > 1:
@@ -411,7 +422,8 @@ def process_command(command_list):
         container = which[0]
 
         unstack_container(container)
-        empty_container(container, config[container])
+        if Mode['destructive']=='destructive':
+            empty_container(container, config[container])
         fill_container(container, config[container])
         stack_container(container, config[container])
 
@@ -423,10 +435,48 @@ def process_command(command_list):
             if config[container].has_key('build'):
                 edit_dockerfile(container)
 
+    elif command == "mode":
+        MODE_USAGE="Mode can either be 'noisy', 'quiet', 'destructive', 'conservative'"
+        if len(command_list) == 1:
+            print_mode()
+            return
+        mode = command_list[1]
+        config_path = ConfigPath + "/" + Project
+
+        quietFile = config_path + "/quiet"
+        noisyFile = config_path + "/noisy"
+        destructFile = config_path + "/destructive"
+        conserveFile = config_path + "/conservative"
+
+        if mode == "noisy":
+            if os.path.isfile(quietFile):
+                os.remove(quietFile)
+            touch(noisyFile)
+        elif mode == "quiet":
+            if os.path.isfile(noisyFile):
+                os.remove(noisyFile)
+            touch(quietFile)
+        elif mode == "destructive":
+            if os.path.isfile(conserveFile):
+                os.remove(conserveFile)
+            touch(destructFile)
+        elif mode == "conservative":
+            if os.path.isfile(destructFile):
+                os.remove(destructFile)
+            touch(conserveFile)
+        else:
+            print MODE_USAGE
+            return
+
+        print_mode()
+
     else:
         raise Exception("Unknown command '" + command + "'")
 
-    print
+
+def touch(fname, times=None):
+    with open(fname, 'a'):
+        os.utime(fname, times)
 
 def sort_containers():
     tups = list()
@@ -450,6 +500,17 @@ def find_yaml_location():
 
     raise (IOError("grua.yaml file not found"))
 
+def get_mode():
+    noisy='noisy'
+    destructive='destructive'
+    if os.path.isfile(ConfigPath + "/" + Project + "/quiet"):
+        noisy='quiet'
+    if os.path.isfile(ConfigPath + "/" + Project + "/conservative"):
+        destructive='conservative'
+
+    return { "noisy": noisy, "destructive": destructive}
+
+
 def usage():
     print "                grua\n                ----"
     print "              //\\  ___"
@@ -469,11 +530,12 @@ def usage():
     print "   grua edit\t\tEdit grua.yaml from within subfolder"
     print "   grua editd\t\tEdit Dockerfile(s) from within subfolder"
     print
-    print
+    print "   grua mode\t\tSet operating mode"
+    print 
+    print "> grua mode is currently: " + Mode['noisy'] + ", " + Mode['destructive'] 
+    print 
 
 args = sys.argv[1:]
-if len(args)==0:
-    usage()
 
 yamlpath = find_yaml_location()
 
@@ -490,9 +552,23 @@ with open(yamlpath + "/grua.yaml", 'r') as stream:
     for container in config:
         process_container(container, config)
 
+
+# set up configuration path
+try:
+    os.makedirs(ConfigPath + "/" + Project)
+except OSError as exc: # Python >2.5
+    if exc.errno == errno.EEXIST and os.path.isdir(ConfigPath + "/" + Project):
+        pass
+    else: raise
+
+
 sorted_run_deps = sort_containers()
 
-if len(args) > 0:
+Mode = get_mode()
+
+if len(args)==0:
+    usage()
+else:
     process_command(args)
 
 
