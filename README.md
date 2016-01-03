@@ -126,6 +126,9 @@ registrator:
 
 ```
 
+Here the `registrator` container will be stacked after the `consul` container. You can also see
+that registrator is scheduled to start before several containers that depend on it.
+
 #### Attributes relevant to `grua fill`
 
 * <a name="attrs-fill-build">__build__ (value)</a>
