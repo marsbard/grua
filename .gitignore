@@ -1,5 +1,5 @@
 build
-projectname.egg-info
+grua.egg-info
 .idea
 dist
 *.pyc

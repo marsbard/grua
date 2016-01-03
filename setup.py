@@ -4,16 +4,16 @@ except ImportError:
     from distutils.core import setup
 
 config = {
-    'description': 'My Project',
+    'description': 'grua',
     'author': 'Martin Cosgrave',
-    'url': 'URL to get it at.',
-    'download_url': 'Where to download it.',
+    'url': 'http://github.com/marsbard/grua',
+    'download_url': 'http://github.com/marsbard/grua',
     'author_email': 'martin@bettercode.com',
     'version': '0.1',
     'install_requires': ['nose'],
     'packages': ['grua'],
     'scripts': [],
-    'name': 'projectname'
+    'name': 'grua'
 }
 
 setup(**config)
