@@ -275,7 +275,7 @@ registrator:
     - consul
 ```
 
-In actual fact in this case the container will be named `alf_consul`
+In actual fact, from docker's point of view, in this case the container that is linked to will be `alf_consul`
 
 * <a name="attrs-stack-command">__command__ (value)</a>
 
