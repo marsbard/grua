@@ -266,6 +266,17 @@ mysql:
 Equivalent to `--link=<container name>` but it prepends the value of [project](#global-project) to
 the container name.
 
+```
+global:
+  project: alf
+registrator:
+  image: gliderlabs/registrator:latest
+  link:
+    - consul
+```
+
+In actual fact in this case the container will be named `alf_consul`
+
 * <a name="attrs-stack-command">__command__ (value)</a>
 
 Equivalent to the `CMD` directive in the Dockerfile, and also to the command that you would append as 
