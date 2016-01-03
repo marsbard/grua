@@ -29,7 +29,7 @@ postfix:
 
 ## The grua metaphor
 
-'Grua' is Spanish for 'crane'. The metaphor used in `grua` extends tje docker metaphor to imagine a crane 
+'Grua' is Spanish for 'crane'. The metaphor used in `grua` extends the docker metaphor to imagine a crane 
 on a dockside stacking containers into a composition (or, indeed, a stack). But it also uses a 'fill' 
 metaphor to describe 'filling' a container with an image.
 
@@ -39,7 +39,7 @@ SEE COMMAND_LINE
 
 The configuration file is a YAML file. In general each top level entry in the file specifies a container 
 to be built, for example, here is a container that will create a consul container and when in use, will
-wait for the log message "consul: New leader elected: consul" before proceeding:
+wait for the log message `consul: New leader elected: consul` before proceeding:
 
 ```
 consul:
@@ -63,7 +63,7 @@ consul:
 
 Please be sure to note that if you are used to docker-compose, various things will be different, and in 
 particular I have not attempted to model the whole docker command line interface, if you need something 
-that isn't supplied, you can use the 'options:' stanza as shown above.
+that isn't supplied, you can use the `options:` stanza as shown above.
 
 ### Global parameters
 
