@@ -30,9 +30,9 @@ except OSError as exc: # Python >2.5
     else: raise
 
 
-sorted_run_deps = grua.sort_containers()
+grua.sorted_run_deps = grua.sort_containers()
 
-Mode = grua.get_mode()
+grua.Mode = grua.get_mode()
 
 if len(args)==0:
     grua.usage()
