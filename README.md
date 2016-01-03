@@ -78,11 +78,11 @@ Example of global parameters:
 ```
 global:
   project: alf
-	volumepath: /var/lib/grua/volumes
+  volumepath: /var/lib/grua/volumes
 ```
 
 Any volumes you define which do not have a leading slash as part of the local location
-will be placed relative to this volumepath, but when a leading "/" is used (or "./") then the absolute 
+will be placed relative to this volumepath, but when a leading `/" is used (or "./") then the absolute 
 path is used (SEE VOLUMES)
 
 
@@ -120,7 +120,7 @@ building the `tomcat` image.
 
 If you specify both `build` and `image` attributes, then `build` will take preference.
 
-* __image__ (value)
+* [__image__ (value)](#attrs-fill-image)
 
 You must have at least one of `build` or `image` in your configuration. If you have `image`, it refers
 to an image either available on the system or else in the default registry.
@@ -136,3 +136,8 @@ If you specify both `build` and `image` attributes, then `build` will take prefe
 
 #### Attributes relevant to `grua stack`
 
+* __run__ (boolean)
+
+If set to `true` then this will be a container to be run. If set to `false` then just an 
+image will be created. In this case you probably want to list the container names that will
+require this image using a `before` attribute, see 
