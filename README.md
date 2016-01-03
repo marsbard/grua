@@ -17,6 +17,17 @@ in container configuration. Furthermore, rather than just firing the next contai
 the previous one, you can wait for a specific message in the log output before starting the next container. This 
 can give you confidence that each dependency is ready before starting your main application.
 
+Additionally you get the capability to use any data you can find from `docker inspect` on an already 
+running container within the configuration of another container (typically this looks like:
+
+```
+postfix:
+  hostname: postfix
+  dns: <% INSPECT consul {{ .NetworkSettings.IPAddress }} %>
+```
+
+)
+
 ## The grua metaphor
 
 'Grua' is Spanish for 'crane'. The metaphor used in `grua` extends that to imagine a crane on a dockside
