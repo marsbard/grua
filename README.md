@@ -60,7 +60,7 @@ that isn't supplied, you can use the 'options:' stanza as shown above.
 There is one top level section that does not represent a container, and that is the 'global' section.
 It can contain the following configuration items:
 
-* __project__
+* <a name="global-project">__project__</a>
 
 This should be a unique name on your system. If you do not provide this then by default the project name
 is `grua` but you should be aware that if you use two projects with the same name then you are likely to 
@@ -69,7 +69,7 @@ example two projects with the same name having a container called 'mysql' would 
 their databases in the same physical place on your hard drive. It should be obvious that this is a bad idea.
 (In this example I am assuming the same mysql config which exposes the same volumes).
 
-* __volumepath__
+* <a name="global-volumepath">__volumepath__</a>
 
 By default, this is `/var/lib/grua/volumes` but you can set a different path here, if for example you want
 all volumes to be on an nfs mount.
@@ -120,7 +120,7 @@ building the `tomcat` image.
 
 If you specify both `build` and `image` attributes, then `build` will take preference.
 
-* [__image__ (value)](#attrs-fill-image)
+* <a name="attrs-fill-image">__image__ (value)</a>
 
 You must have at least one of `build` or `image` in your configuration. If you have `image`, it refers
 to an image either available on the system or else in the default registry.
@@ -136,8 +136,38 @@ If you specify both `build` and `image` attributes, then `build` will take prefe
 
 #### Attributes relevant to `grua stack`
 
-* [__run__ (boolean)](#attrs-stack-run)
+* <a name="attrs-stack-run">__run__ (boolean)</a>
 
 If set to `true` then this will be a container to be run. If set to `false` then just an 
 image will be created. In this case you probably want to list the container names that will
-require this image using a `before` attribute, see [build](#attrs-fill-build)
+require this image using a `before` attribute, see example in [build](#attrs-fill-build)
+
+By default this is `true` so you only need to specify it when you don't want the image to be
+run as a container, e.g.:
+
+```
+tomcat:
+  build: tomcat
+  tag: marsbard/tomcat
+  run: false
+```
+
+* <a name="attrs-stack-options">__options__ (list)</a>
+
+Any docker options for which grua does not provide a replacement may be provided here. In fact
+options for which grua _does_ provide a replacement may also be provided here but be aware that
+grua names things with the `project` attribute from the [global](#global-parameters) section, for 
+example, if the project is `foo`, and the container is defined as `mysql` within `grua.yaml`, then
+the container that docker will work with will be named `foo_mysql`
+
+This attribute is useful for specifying ports to expose, as currently there is no grua replacement for
+the `--expose` command line argument:
+
+```
+consul:
+  build: consul
+  options:
+    - "--expose=8300"
+    - "--expose=8500"
+    - "--expose=53"
+```
