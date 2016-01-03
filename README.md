@@ -52,7 +52,7 @@ that isn't supplied, you can use the 'options:' stanza as shown above.
 There is one top level section that does not represent a container, and that is the 'global' section.
 It can contain the following configuration items:
 
-* '''project'''
+* ~~project~~
 
 This should be a unique name on your system. If you do not provide this then by default the project name
 is `grua` but you should be aware that if you use two projects with the same name then you are likely to 
