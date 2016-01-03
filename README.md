@@ -52,7 +52,7 @@ that isn't supplied, you can use the 'options:' stanza as shown above.
 There is one top level section that does not represent a container, and that is the 'global' section.
 It can contain the following configuration items:
 
-* project
+* '''project'''
 
 This should be a unique name on your system. If you do not provide this then by default the project name
 is `grua` but you should be aware that if you use two projects with the same name then you are likely to 
@@ -61,7 +61,7 @@ example two projects with the same name having a container called 'mysql' would 
 their databases in the same physical place on your hard drive. It should be obvious that this is a bad idea.
 (In this example I am assuming the same mysql config which exposes the same volumes).
 
-* volumepath
+* '''volumepath'''
 
 By default, this is `/var/lib/grua/volumes` but you can set a different path here, if for example you want
 all volumes to be on an nfs mount.
@@ -73,13 +73,14 @@ global:
 	volumepath: /var/lib/grua/volumes
 ```
 
-Any volumes you define (SEE VOLUMES) which do not have a leading slash as part of the local location
+Any volumes you define which do not have a leading slash as part of the local location
 will be placed relative to this volumepath, but when a leading "/" is used (or "./") then the absolute 
-path is used
+path is used (SEE VOLUMES)
+
 
 ### Container configuration
 
-* build (value)
+* '''build''' (value)
 
 You must have at least one of `build` or `image` in your configuration. If you have `build`, it refers
 to a folder beneath the location of `grua.yaml` which should contain a Dockerfile and any other resources
@@ -105,7 +106,7 @@ base:
 Also note here that 'before' was specified. Normally this specifies runtime ordering but it also specifies
 build ordering when `run: false` is in effect
 
-* image (value)
+* '''image''' (value)
 
 You must have at least one of `build` or `image` in your configuration. If you have `image`, it refers
-to an image either available on the system 
+to an image either available on the system or else in the default registry.
