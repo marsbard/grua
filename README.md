@@ -75,10 +75,13 @@ It can contain the following configuration items:
 
 This should be a unique name on your system. If you do not provide this then by default the project name
 is `grua` but you should be aware that if you use two projects with the same name then you are likely to 
-get clashes in mode configuration (SEE MODE) and in the worst case you could get data corruption, for 
+get clashes in mode configuration (SEE MODE) and in the worst case you could get data corruption. For 
 example two projects with the same name having a container called 'mysql' would attempt to maintain both
 their databases in the same physical place on your hard drive. It should be obvious that this is a bad idea.
 (In this example I am assuming the same mysql config which exposes the same volumes).
+
+Just be sure to always specify a `global` top level element containing a `project` attribute that
+doesn't exist in any other `grua` project on your system.
 
 * <a name="global-volumepath">__volumepath__</a>
 
