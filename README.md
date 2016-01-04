@@ -7,7 +7,7 @@ An opinionated declarative docker composition tool with runtime dependencies bet
 
 ## Why another composition tool?
 
-`docker-compose` is a great tool CONFUSING ~~ if you want to build microservices, and you have well behaved containers that 
+`docker-compose` is a great tool CONFUSING ~~if you want to build microservices, and you have well behaved containers that 
 can tolerate dependent services not being readily available, but in the real world, when you are dockerising
 a complex monolithic application, you might find that if containers come up out of order that even when the 
 dependencies become available, the target application fails to start properly.~~
