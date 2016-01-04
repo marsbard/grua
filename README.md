@@ -365,7 +365,7 @@ mysql:
     logmsg: "mysqld: ready for connections"
     sleep: 2
 ```
-That will sleep for 2 extra seconds after the requisite `logmsg` has been seen.
+That example sleeps for 2 extra seconds after the requisite `logmsg` has been seen.
 
 By default grua will wait up to 30 seconds for the requirements to be met before throwing an exception 
 but you can set a timeout, e.g.:
