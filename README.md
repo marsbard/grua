@@ -37,9 +37,10 @@ SEE COMMAND_LINE
 
 ## The configuration file, `grua.yaml`
 
-The configuration file is a YAML file. In general each top level attribute in the file specifies a container 
-to be built, for example, here is a container that will create a consul container and when in use, will
-wait for the log message `consul: New leader elected: consul` before proceeding:
+The configuration file is a YAML file. In general, (apart from [the global parameters](#global-parameters) 
+each top level attribute in the file specifies a container to be built, for example, here is a container 
+that will create a consul container and when in use, will wait for the log message 
+`consul: New leader elected: consul` before proceeding:
 
 ```
 consul:
@@ -404,7 +405,7 @@ $ grua
 
    grua mode		Set operating mode
 
-\> grua mode is currently: noisy, destructive
+> grua mode is currently: noisy, destructive
 
 ```
 
