@@ -37,10 +37,10 @@ SEE COMMAND_LINE
 
 ## The configuration file, `grua.yaml`
 
-The configuration file is a YAML file. In general, (apart from [the global parameters](#global-parameters) 
+The configuration file is a YAML file. In general, (apart from [the global parameters](#global-parameters)) 
 each top level attribute in the file specifies a container to be built, for example, here is a container 
 that will create a consul container and when in use, will wait for the log message 
-`consul: New leader elected: consul` before proceeding:
+`consul: New leader elected: consul` before proceeding to stack the next container:
 
 ```
 consul:
@@ -365,6 +365,7 @@ mysql:
     logmsg: "mysqld: ready for connections"
     sleep: 2
 ```
+That will sleep for 2 extra seconds after the requisite `logmsg` has been seen.
 
 By default grua will wait up to 30 seconds for the requirements to be met before throwing an exception 
 but you can set a timeout, e.g.:
