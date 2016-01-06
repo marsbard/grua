@@ -5,27 +5,27 @@ import yaml, sys, errno, os
 
 args = sys.argv[1:]
 
-yamlpath = grua.find_yaml_location()
+grua.yamlpath = grua.find_yaml_location()
 
-os.chdir(yamlpath)
+os.chdir(grua.yamlpath)
 
 
-with open(yamlpath + "/grua.yaml", 'r') as stream:
-    config = yaml.load(stream)
-    if config.has_key('global'):
-        if config['global'].has_key('project'):
-            Project = config['global']['project']
-        if config['global'].has_key('VolumePath'):
-            VolumePath = config['global']['VolumePath']
-    for container in config:
-        grua.calc_deps(container, config)
+with open(grua.yamlpath + "/grua.yaml", 'r') as stream:
+    grua.config = yaml.load(stream)
+    if grua.config.has_key('global'):
+        if grua.config['global'].has_key('project'):
+            grua.Project = grua.config['global']['project']
+        if grua.config['global'].has_key('VolumePath'):
+            grua.VolumePath = grua.config['global']['VolumePath']
+    for container in grua.config:
+        grua.calc_deps(container, grua.config)
 
 
 # set up configuration path
 try:
     os.makedirs(grua.ConfigPath + "/" + grua.Project)
 except OSError as exc: # Python >2.5
-    if exc.errno == errno.EEXIST and os.path.isdir(grua.ConfigPath + "/" + Project):
+    if exc.errno == errno.EEXIST and os.path.isdir(grua.ConfigPath + "/" + grua.Project):
         pass
     else: raise
 

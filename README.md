@@ -115,7 +115,7 @@ share:
     - solr
 ```
 In this instance, the `share` container will be stacked before the `solr` container is, and also
-when the underlying images are created they respect the same order.
+when the underlying images are filled they respect the same order.
 
 When unstacking or emptying the containers, the ordering is respected in reverse. In the example shown
 above, the `solr` container would be unstacked before the `share` container.
@@ -143,6 +143,9 @@ registrator:
 
 Here the `registrator` container will be stacked after the `consul` container. You can also see
 that `registrator` is scheduled to start before several containers that depend on it.
+
+When unstacking or emptying the containers, the ordering is respected in reverse. In the example shown
+above, the `alfresco` container would be unstacked before the `registrator` container.
 
 #### Attributes relevant to `grua fill`
 

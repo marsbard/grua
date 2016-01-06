@@ -8,20 +8,24 @@ GruaBase = '/var/lib/grua'
 VolumePath = GruaBase + '/volumes' # replaced by 'global/volumepath' in grua.yaml
 ConfigPath = os.environ["HOME"] + "/.grua"
 
+yaml_path = "."
+config = {}
+sorted_run_deps = []
+
 UnstackTimeout = 15
 Dependencies = dict()
 
 
-def announce(msg):
-    if Mode['noisy'] == 'noisy':
+def announce(msg, ignore_quiet=False):
+    if Mode['noisy'] == 'noisy' or ignore_quiet:
         print "\n>>> " + msg + "\n"
 
-def mention(msg):
-    if Mode['noisy'] == 'noisy':
+def mention(msg, ignore_quiet=False):
+    if Mode['noisy'] == 'noisy' or ignore_quiet:
         print ">> " + msg
 
-def note(msg):
-    if Mode['noisy'] == 'noisy':
+def note(msg, ignore_quiet=False):
+    if Mode['noisy'] == 'noisy' or ignore_quiet:
         print "> " + msg
 
 
@@ -307,7 +311,8 @@ def container_status(container):
     except subprocess.CalledProcessError:
         output = "_ unstacked _"
 
-    mention(container + ": " + output),
+    ignore_quiet=True
+    mention(container + ": " + output, ignore_quiet),
 
 def empty_container(container, config):
     announce("Emptying image " + container)
@@ -352,7 +357,8 @@ def process_command(command_list):
     command = commands.popleft()
 
     if len(commands) > 0:
-        which = [commands.popleft()]
+        #which = [commands.popleft()]
+        which = commands
     else:
         deps = sorted_run_deps
         deps.remove('global')
@@ -508,6 +514,7 @@ def get_mode():
 
 
 def usage():
+    Mode = get_mode()
     print "                grua\n                ----"
     print "              //\\  ___"
     print "              Y  \\/_/=|"
