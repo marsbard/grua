@@ -357,7 +357,6 @@ You may specify:
 > If sleep is specified with any other `upwhen` directive, then the sleep will occur after the other 
 > directives have been satisfied. For example if both `logmsg` and `sleep` are specified then the 
 > sleep will occur after the `logmsg` has been seen.
-
 ```
 mysql:
   upwhen:
