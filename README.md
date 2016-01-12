@@ -33,7 +33,7 @@ postfix:
 on a dockside stacking containers into a composition (or, indeed, a stack). But it also uses a 'fill' 
 metaphor to describe 'filling' a container with an image.
 
-SEE COMMAND_LINE
+See [grua command line](#grua-command-line)
 
 ## The configuration file, `grua.yaml`
 
@@ -489,26 +489,144 @@ the dependency ordering in the configuration file.
 #### stack
 </a>
 
+Stack the container composition. Equivalent to `docker run` but respecting the dependency 
+ordering defined in the [configuration file](#the-configuration-file-gruayaml) as well 
+as possibly [waiting for  containers to become ready](#attrs-stack-upwhen).
+
+You can specify a number of containers to stack but if a container to be stacked depends
+directly on a container which is not stacked (for instance it is [linked](#attrs-stack-link)),
+then the stacking may fail. You're ok to start containers that are out of order with respect
+to the configuration, as long as they don't have direct dependencies like [link](#attrs-stack-link)
+
+If the config item `run: false` is set for a container, that container is not stacked.
+
 <a name="cli-unstack">
 #### unstack
 </a>
+
+Dismantle the container composition. Equivalent to running `docker stop` on all the containers
+in their correct order, which is the reverse of that defined in the 
+[configuration file](#the-configuration-file-gruayaml).
+
+Unstacking also removes the container, equivalent to `docker rm --force`. I told you this 
+framework was opinionated `;-)`. You should never create docker containers that store state
+inside them, so this methodology keeps you honest `:-)`. Of course data that is persisted
+into volumes is untouched.
+
+If the config item `run: false` is set for a container, that container is not unstacked.
 
 <a name="cli-restack">
 #### restack
 </a>
 
+Run [`unstack`](#cli-unstack) followed by [`stack`](#cli-stack).
+
+If no container names are passed in, then all containers which don't have `run: false` defined
+in their config will be restacked in the order defined by the 
+[configuration file](#the-configuration-file-gruayaml).
+
+If container names are passed on the command line then they will be processed in the order
+given on the command line/
+
+If the config item `run: false` is set for a container, that container is not restacked.
+
 <a name="cli-enter">
 #### enter
 </a>
+
+Enter a stacked container and execute a command. By default the command is `/bin/bash` but if 
+the container you are running does not have the `bash` interpreter installed you can pass any
+command you like. It is equivalent to running `docker run -ti <project>_<container> /bin/bash`
+in the default mode.
+
+For example, you could run `grua enter consul sh` to run 'sh' instead of '/bin/bash'.
+
+You can also pass one shot commands, e.g. `grua enter consul cat /proc/cpuinfo`. When combined
+with [`mode`](#cli-mode) `quiet`, this can be a useful way to interrogate your stacked 
+containers using scripting.
+
 <a name="cli-status">
 #### status
 </a>
+
+Show whether the containers in the composition are stacked or unstacked. This command does not
+yet tell you if an unstacked container has been filled or not. 
+
+Also shows the current setting of [`mode`](#cli-mode)
+
+Output is similar to the following.
+```
+$ grua status
+>> haveged: ^ stacked ^
+>> consul: ^ stacked ^
+>> libreoffice: ^ stacked ^
+>> registrator: ^ stacked ^
+>> postfix: ^ stacked ^
+>> mysql: ^ stacked ^
+>> httpd: ^ stacked ^
+>> alfresco: ^ stacked ^
+>> share: _ unstacked _
+>> solr: _ unstacked _
+Mode is quiet, conservative
+
+```
+
+
 <a name="cli-edit">
 #### edit
 </a>
+Edit the [configuration file grua.yaml](#the-configuration-file-gruayaml). The advantage of 
+using this grua command rather than something like `$EDITOR ../grua.yaml` is that you can 
+use this from any subdirectory beneath the location of `grua.yaml` and it will automatically
+find the config file for you without you needing to navigate away from your current working 
+folder nor requiring you to stack up a number of "../" strings in front.
+
+It uses the current value of `$EDITOR` in your environment. If it isn't defined, make sure
+you export some value, e.g. `$ export EDITOR=vim` before running `grua edit`
+
 <a name="cli-editd">
 #### editd
 </a>
+Edit one or more Dockerfiles. If you don't pass a container name it is going to offer you 
+each file to edit one after the other. This may not be what you want. It is probably best
+to explicitly pass in the container names whose Dockerfiles you wish to edit.
+
+It uses the current value of `$EDITOR` in your environment. If it isn't defined, make sure
+you export some value, e.g. `$ export EDITOR=vim` before running `grua editd`
+
 <a name="cli-mode">
 #### mode
 </a>
+
+Currently there are two configurations you can set here. They each have two possible 
+values.
+
+* __noisy__ / __quiet__
+
+When `noisy` is set (with `grua mode noisy`) then `grua` will tell you various things
+about what it is doing. In particular it will show each `docker` command that it runs
+in its entirety.
+
+When `noisy` is set (with `grua mode quiet`) then `grua` will suppress all its output.
+This may be handy if you want to use `grua` as the target of some shell script.
+
+Example of 'noisy' output:
+```
+$ grua fill haveged
+
+>>> Filling haveged container
+
+>> haveged uses an image. Pulling harbur/haveged:1.7c-1
+> docker pull harbur/haveged:1.7c-1
+1.7c-1: Pulling from harbur/haveged
+Digest: sha256:b0f5fa6c6791793d08016a31c76098a22d5cb6a234be5f1e8866ace43295681b
+Status: Image is up to date for harbur/haveged:1.7c-1
+```
+
+* __destructive__ / __conservative__
+
+When `destructive` is set (`grua mode destructive`), then during a [`refill`](#cli-refill)
+execution, the container will be emptied. 
+
+When `conservative` is set (`grua mode conservative`), then during a [`refill`](#cli-refill)
+execution, the container will not be emptied. 
