@@ -393,7 +393,7 @@ httpd:
   volumes:
     - logs:/usr/local/apache2/logs
 ```
-> In this case, you are searching inside `/usr/local/apache2/logs/error.log' on the container, 
+> In this case, you are searching inside `/usr/local/apache2/logs/error.log` on the container, 
 > which is exported as a volume `/var/lib/grua/volumes/<project>/httpd/error.log` in this case
 > (assuming that [`volumepath`](#global-volumepath) has not been altered).
 >
