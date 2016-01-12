@@ -358,6 +358,15 @@ You may specify:
 > directives have been satisfied. For example if both `logmsg` and `sleep` are specified then the 
 > sleep will occur after the `logmsg` has been seen.
 
+```
+mysql:
+  upwhen:
+    logmsg: "mysqld: ready for connections"
+    sleep: 2
+```
+> That example sleeps for 2 extra seconds after the requisite `logmsg` has been seen.
+
+
 or
 
 > <a name="attrs-stack-upwhen-logmsg">__logmsg__ (value)</a>
@@ -380,17 +389,11 @@ httpd:
   upwhen:
     logmsg: "resuming normal operations"
     logfile: logs/error.log
+  volumes:
+    - logs:/
 ```
 > If 'logmsg' is not present this has no effect.
 
-
-```
-mysql:
-  upwhen:
-    logmsg: "mysqld: ready for connections"
-    sleep: 2
-```
-That example sleeps for 2 extra seconds after the requisite `logmsg` has been seen.
 
 By default grua will wait up to 30 seconds for the requirements to be met before throwing an exception 
 but you can change the timeout, e.g.:
