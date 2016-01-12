@@ -611,8 +611,9 @@ folder nor requiring you to stack up a number of `../` strings in front.
 It uses the current value of `$EDITOR` in your environment. If it isn't defined, make sure
 you export some value, e.g. 
 ```
-$ export EDITOR=vim` before running `grua edit
-```
+$ export EDITOR=vim
+``` 
+before running `grua edit`
 
 <a name="cli-editd">
 #### editd
@@ -632,7 +633,11 @@ If you pass the name of a container which does not have a `build` element in its
 it will be silently skipped, generating no errors.
 
 It uses the current value of `$EDITOR` in your environment. If it isn't defined, make sure
-you export some value, e.g. `$ export EDITOR=vim` before running `grua editd`
+you export some value, e.g. 
+```
+$ export EDITOR=vim
+``` 
+before running `grua editd`
 
 <a name="cli-mode">
 #### mode
