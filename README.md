@@ -375,11 +375,12 @@ and secondly you should then add a 'logfile' parameter:
 a file, rather than the stdout of the main process. This file must have been exported as a docker 
 volume, and the value given here should be that of the local path on the host side, for example:
 >
-> `httpd:`
-> `  upwhen:`
-> `    logmsg: "resuming normal operations"`
-> `    logfile: logs/error.log`
-
+```
+httpd:
+  upwhen:
+    logmsg: "resuming normal operations"
+    logfile: logs/error.log
+```
 > If 'logmsg' is not present this has no effect.
 
 
