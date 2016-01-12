@@ -7,10 +7,10 @@ An opinionated declarative docker composition tool with runtime dependencies bet
 
 ## Why another composition tool?
 
-`docker-compose` is a great tool CONFUSING ~~if you want to build microservices, and you have well behaved containers that 
+`docker-compose` is a great tool if you want to build microservices, and you have well behaved containers that 
 can tolerate dependent services not being readily available, but in the real world, when you are dockerising
 a complex monolithic application, you might find that if containers come up out of order that even when the 
-dependencies become available, the target application fails to start properly.~~
+dependencies become available, the target application fails to start properly.
 
 So `grua` adds explicit dependency ordering to container composition, by use of  `before` and `after` attributes
 in container configuration. Furthermore, rather than just firing the next container as soon as docker has started
@@ -416,5 +416,76 @@ $ grua
 
 ```
 
-#### fill
+I have slightly tortured the docker container metaphor to make it fit my crane metaphor, but for the 
+purpose it works quite well. I say that _filling_ a container is analagous to the `docker build` and 
+`docker pull` commands, i.e. it gets a docker image on your system, and in my metaphor I say you have 
+filled the grua container (that's the torture bit of the docker metaphor).
 
+Then, instead of 'docker run', I have 'grua stack', where your containers are stacked into a 
+composition. This is the same as `docker run` but because of the dependency ordering feature as well 
+as the ability of waiting for a container to be completely ready before stacking the next one, 
+stacking seemed like a better metaphor to me.
+
+<a name="cli-fill">
+#### fill
+</a>
+
+Fill the grua containers by creating or fetching docker images. The same dependency ordering is 
+respected as for the [`stack`](#cli_stack) command, that is, the 'before' and 'after' elements
+of the configuration are taken into account. 
+
+Equivalent to running `docker build` when the configuration contains a 'build' element, or else 
+equivalent to `docker run` when the configuration contains an 'image' element. 
+
+You can pass multiple container names, e.g. `grua fill postfix alfresco mysql` and each one will 
+be filled, and the ordering of the configuration file, rather than what is passed on the command 
+line, will be respected.
+
+<a name="cli-empty">
+#### empty
+</a>
+
+Empty the grua containers. First `grua` attempts to unstack the container, if the container is
+not stacked a harmless error is reported. Then the image is removed using `docker rmi`.
+
+If multiple container names are passed they will be emptied in reverse order to the dependencies
+listed in the configuration, for example, this config fragment:
+```
+alfresco:
+  after: mysql
+```
+which ensures that while filling or stacking, that 'mysql' is filled or stacked before 'alfresco',
+means that during the 'empty' phase, the 'alfresco' container will be emptied (and therefore 
+unstack attempted) before the 'mysql' container.
+
+<a name="cli-refill">
+#### refill
+</a>
+
+<a name="cli-stack">
+#### stack
+</a>
+
+<a name="cli-unstack">
+#### unstack
+</a>
+
+<a name="cli-restack">
+#### restack
+</a>
+
+<a name="cli-enter">
+#### enter
+</a>
+<a name="cli-status">
+#### status
+</a>
+<a name="cli-edit">
+#### edit
+</a>
+<a name="cli-editd">
+#### editd
+</a>
+<a name="cli-mode">
+#### mode
+</a>
