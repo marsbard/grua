@@ -147,7 +147,7 @@ that `registrator` is scheduled to start before several containers that depend o
 When unstacking or emptying the containers, the ordering is respected in reverse. In the example shown
 above, the `alfresco` container would be unstacked before the `registrator` container.
 
-#### Attributes relevant to `grua fill`
+#### Attributes relevant to [`grua fill`](#cli-fill)
 
 * <a name="attrs-fill-build">__build__ (value)</a>
 
