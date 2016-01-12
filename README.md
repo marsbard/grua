@@ -609,7 +609,10 @@ find the config file for you without you needing to navigate away from your curr
 folder nor requiring you to stack up a number of `../` strings in front.
 
 It uses the current value of `$EDITOR` in your environment. If it isn't defined, make sure
-you export some value, e.g. `$ export EDITOR=vim` before running `grua edit`
+you export some value, e.g. 
+```
+$ export EDITOR=vim` before running `grua edit
+```
 
 <a name="cli-editd">
 #### editd
@@ -619,7 +622,10 @@ each file to edit one after the other. This may not be what you want. It is prob
 to explicitly pass in the container names whose Dockerfiles you wish to edit.
 
 Similarly to `grua edit`, you can be anywhere in the directory tree below the `grua.yaml`
-file and this will work to open any Dockerfile you specify, e.g. `grua edit alfresco share`
+file and this will work to open any Dockerfile you specify, e.g. 
+```
+grua edit alfresco share
+```
 will edit the Dockerfiles for the `alfresco` and `share` containers in turn.
 
 If you pass the name of a container which does not have a `build` element in its config,
