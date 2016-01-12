@@ -652,8 +652,9 @@ When `noisy` is set (with `grua mode noisy`) then `grua` will tell you various t
 about what it is doing. In particular it will show each `docker` command that it runs
 in its entirety.
 
-When `noisy` is set (with `grua mode quiet`) then `grua` will suppress all its output.
-This may be handy if you want to use `grua` as the target of some shell script.
+When `quiet` is set (with `grua mode quiet`) then `grua` will suppress all its output.
+This may be handy if you want to use `grua` as the target of some shell script. The output
+of docker commands executed is not suppressed, see examples:
 
 Example of 'noisy' output:
 ```
@@ -663,6 +664,14 @@ $ grua fill haveged
 
 >> haveged uses an image. Pulling harbur/haveged:1.7c-1
 > docker pull harbur/haveged:1.7c-1
+1.7c-1: Pulling from harbur/haveged
+Digest: sha256:b0f5fa6c6791793d08016a31c76098a22d5cb6a234be5f1e8866ace43295681b
+Status: Image is up to date for harbur/haveged:1.7c-1
+```
+
+Example of 'quiet' output:
+```
+$ grua fill haveged
 1.7c-1: Pulling from harbur/haveged
 Digest: sha256:b0f5fa6c6791793d08016a31c76098a22d5cb6a234be5f1e8866ace43295681b
 Status: Image is up to date for harbur/haveged:1.7c-1
