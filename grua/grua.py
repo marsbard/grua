@@ -217,11 +217,18 @@ def wait_for_up(container, config):
         else:
             if logfile.startswith('/'):
                 command = ["tail", logfile]
-            else:
-                command = ["tail", VolumePath + "/" + Project + "/" + container + "/" + logfile]
 
-        output = subprocess.check_output(command, stderr=subprocess.STDOUT)
-        if output.find(logmsg) > 0:
+            else:
+                # there's a chance we try to tail it before it exists... just ignore that time
+                if os._exists(logfile):
+                    command = ["tail", VolumePath + "/" + Project + "/" + container + "/" + logfile]
+
+
+        if 'command' in locals():
+            print 'command ' + command
+            output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+
+        if 'output' in locals() and output.find(logmsg) > 0:
             ok = True
             break
         else:

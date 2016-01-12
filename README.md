@@ -496,7 +496,9 @@ means that during the 'empty' phase, the 'alfresco' container will be emptied (a
 unstack attempted) before the 'mysql' container.
 
 If some container names are passed on the command line, for example 
-```grua empty mysql alfresco```
+```
+$ grua empty mysql alfresco
+```
 they will be processed in the order given on the command line.
 
 <a name="cli-refill">
