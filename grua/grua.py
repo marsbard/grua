@@ -202,11 +202,20 @@ def wait_for_up(container, config):
     if upwhen.has_key('logmsg'):
         logmsg = get_value(upwhen, 'logmsg')
 
-    mention("Waiting for '" + logmsg + "' to indicate that " + container + " is stacked")
+        if upwhen.has_key('logfile'):
+            logfile = get_value(upwhen, 'logfile')
+            mention("Waiting for '" + logmsg + "' in '" + logfile + "' to indicate that " + container + " is stacked")
+
+        else:
+            mention("Waiting for '" + logmsg + "' to indicate that " + container + " is stacked")
+
     waited = 0
     ok = False
     while waited <= timeout:
-        command = ["docker", "logs", get_container(container)]
+        if not logfile:
+            command = ["docker", "logs", get_container(container)]
+        else:
+            command = ["tail", VolumePath + "/" + Project + "/" + container + "/" + logfile]
 
         output = subprocess.check_output(command, stderr=subprocess.STDOUT)
         if output.find(logmsg) > 0:

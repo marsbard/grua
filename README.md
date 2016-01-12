@@ -350,13 +350,6 @@ been seen, or until a sleep period has passed.
 You may specify:
 
 
-> <a name-"attrs-stack-upwhen-logmsg">__logmsg__ (value)</a>
->
-> Runs `docker logs <grua container name>"` continuously, once per second, until either the specified
-> message has been found (uses python `<string>.find()`) or else the timeout has been reached.
-
-or
-
 > <a name="attrs-stack-upwhen-sleep">__sleep__ (value)</a>
 >
 > Sleep for the specified number of seconds. Sleeping is always likely to be fragile and is discouraged.
@@ -364,6 +357,31 @@ or
 > If sleep is specified with any other `upwhen` directive, then the sleep will occur after the other 
 > directives have been satisfied. For example if both `logmsg` and `sleep` are specified then the 
 > sleep will occur after the `logmsg` has been seen.
+
+or
+
+> <a name="attrs-stack-upwhen-logmsg">__logmsg__ (value)</a>
+>
+> Runs `docker logs <grua container name>` continuously, once per second, until either the specified
+> message has been found (uses python `<string>.find()`) or else the timeout has been reached.
+
+By default the stdout of the main process will be searched, if you need instead to search within
+some generated logfile, you need to first ensure the logfile is being mounted as or within a volume,
+and secondly you should then add a 'logfile' parameter:
+
+> <a name="attrs-stack-upwhen-logfile">__logfile__ (value)</a>
+>
+> When this attribute is present, it alters the behaviour of the 'logmsg' attribute to search within
+a file, rather than the stdout of the main process. This file must have been exported as a docker 
+volume, and the value given here should be that of the local path on the host side, for example:
+>
+> `httpd:`
+> `  upwhen:`
+> `    logmsg: "resuming normal operations"`
+> `    logfile: logs/error.log`
+
+> If 'logmsg' is not present this has no effect.
+
 
 ```
 mysql:
