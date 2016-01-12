@@ -381,8 +381,10 @@ and secondly you should then add a 'logfile' parameter:
 >
 > When this attribute is present, it alters the behaviour of the 'logmsg' attribute to search within
 a file, rather than the stdout of the main process. This file must have been exported as a docker 
-volume, and the value given here should be that of the local path on the host side, for example:
->
+volume, and the value given here should be that of the local path on the host side, following the
+same rules as for [`volumes`](#attrs-stack-volumes), viz., if the filename begins with a `/` it is
+presumed to be an absolute filename on the host, whereas if it does not it is presumed to be a local
+path to the grua volumes for this project and container. For example:
 ```
 httpd:
   upwhen:
@@ -391,6 +393,10 @@ httpd:
   volumes:
     - logs:/usr/local/apache2/logs
 ```
+> In this case, you are searching inside `/usr/local/apache2/logs/error.log' on the container, 
+> which is exported as a volume `/var/lib/grua/volumes/<project>/httpd/error.log` in this case
+> (assuming that [`volumepath`](#global-volumepath) has not been altered).
+>
 > If 'logmsg' is not present this has no effect.
 
 

@@ -215,7 +215,10 @@ def wait_for_up(container, config):
         if not logfile:
             command = ["docker", "logs", get_container(container)]
         else:
-            command = ["tail", VolumePath + "/" + Project + "/" + container + "/" + logfile]
+            if logfile.startswith('/'):
+                command = ["tail", logfile]
+            else:
+                command = ["tail", VolumePath + "/" + Project + "/" + container + "/" + logfile]
 
         output = subprocess.check_output(command, stderr=subprocess.STDOUT)
         if output.find(logmsg) > 0:
