@@ -591,6 +591,13 @@ Edit one or more Dockerfiles. If you don't pass a container name it is going to 
 each file to edit one after the other. This may not be what you want. It is probably best
 to explicitly pass in the container names whose Dockerfiles you wish to edit.
 
+Similarly to `grua edit`, you can be anywhere in the directory tree below the `grua.yaml`
+file and this will work to open any Dockerfile you specify, e.g. `grua edit alfresco share`
+will edit the Dockerfiles for the `alfresco` and `share` containers in turn.
+
+If you pass the name of a container which does not have a `build` element in its config,
+it will be silently skipped, generating no errors.
+
 It uses the current value of `$EDITOR` in your environment. If it isn't defined, make sure
 you export some value, e.g. `$ export EDITOR=vim` before running `grua editd`
 
