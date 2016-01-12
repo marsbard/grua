@@ -389,7 +389,7 @@ httpd:
     logmsg: "resuming normal operations"
     logfile: logs/error.log
   volumes:
-    - logs:/
+    - logs:/usr/local/apache2/logs
 ```
 > If 'logmsg' is not present this has no effect.
 
