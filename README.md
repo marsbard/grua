@@ -448,7 +448,7 @@ purpose it works quite well. I say that _filling_ a container is analagous to th
 `docker pull` commands, i.e. it gets a docker image on your system, and in my metaphor I say you have 
 filled the grua container (that's the torture bit of the docker metaphor).
 
-Then, instead of 'docker run', I have 'grua stack', where your containers are stacked into a 
+Then, instead of `docker run`, I have `grua stack`, where your containers are stacked into a 
 composition. This is the same as `docker run` but because of the dependency ordering feature as well 
 as the ability of waiting for a container to be completely ready before stacking the next one, 
 stacking seemed like a better metaphor to me.
@@ -499,10 +499,10 @@ they will be processed in the order given on the command line.
 </a>
 
 First, attempt to unstack the container in case it is stacked. Then, if [`mode`](#cli-mode) has
-been set `destructive`, empty the container. (If [`mode`](#cli-mode)  is `conservative` then 
-the container is not emptied).
+been set `destructive`, [`empty`](#cli-empty) the container. (If [`mode`](#cli-mode)  is 
+`conservative` then the container is not emptied).
 
-Then runs [`fill`](#cli-fill). If [`mode`](#cli-mode) was `conservative` and therefore the 
+Then run [`fill`](#cli-fill). If [`mode`](#cli-mode) was `conservative` and therefore the 
 container was not emptied, the fill process will be much faster than if [`mode`](#cli-mode)  is
 set `destructive`.
 
@@ -606,7 +606,7 @@ Edit the [configuration file grua.yaml](#the-configuration-file-gruayaml). The a
 using this grua command rather than something like `$EDITOR ../grua.yaml` is that you can 
 use this from any subdirectory beneath the location of `grua.yaml` and it will automatically
 find the config file for you without you needing to navigate away from your current working 
-folder nor requiring you to stack up a number of "../" strings in front.
+folder nor requiring you to stack up a number of `../` strings in front.
 
 It uses the current value of `$EDITOR` in your environment. If it isn't defined, make sure
 you export some value, e.g. `$ export EDITOR=vim` before running `grua edit`
