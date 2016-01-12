@@ -193,7 +193,7 @@ mysql:
 
 If you specify both `build` and `image` attributes, then `build` will take preference.
 
-#### Attributes relevant to `grua stack`
+#### Attributes relevant to [`grua stack`](#cli-stack)
 
 * <a name="attrs-stack-run">__run__ (boolean)</a>
 
@@ -431,24 +431,30 @@ stacking seemed like a better metaphor to me.
 </a>
 
 Fill the grua containers by creating or fetching docker images. The same dependency ordering is 
-respected as for the [`stack`](#cli_stack) command, that is, the 'before' and 'after' elements
+respected as for the [`stack`](#cli-stack) command, that is, the 'before' and 'after' elements
 of the configuration are taken into account. 
 
 Equivalent to running `docker build` when the configuration contains a 'build' element, or else 
 equivalent to `docker run` when the configuration contains an 'image' element. 
 
 You can pass multiple container names, e.g. `grua fill postfix alfresco mysql` and each one will 
-be filled, and the ordering of the configuration file, rather than what is passed on the command 
-line, will be respected.
+be filled, and the ordering that is passed on the command line will be respected.
+
+If no container names are passed, all containers that are defined will be filled.
+
+If you fill a container that has already been filled, and has not been subsequently emptied, then
+it is likely that all the layers defined in the Dockerfile will be built from cache.
 
 <a name="cli-empty">
 #### empty
 </a>
 
 Empty the grua containers. First `grua` attempts to unstack the container, if the container is
-not stacked a harmless error is reported. Then the image is removed using `docker rmi`.
+not stacked a harmless error is reported. Then the image is removed using `docker rmi`. Note that
+this tends to remove all the intermediate containers from the cache too, so filling the container
+again will not have any cached images to rely on and thus will take longer to fill.
 
-If multiple container names are passed they will be emptied in reverse order to the dependencies
+If no container names are passed, all containers will be emptied in reverse order to the dependencies
 listed in the configuration, for example, this config fragment:
 ```
 alfresco:
@@ -458,9 +464,26 @@ which ensures that while filling or stacking, that 'mysql' is filled or stacked 
 means that during the 'empty' phase, the 'alfresco' container will be emptied (and therefore 
 unstack attempted) before the 'mysql' container.
 
+If some container names are passed on the command line, for example `grua empty mysql alfresco` 
+they will be processed in the order given on the command line.
+
 <a name="cli-refill">
 #### refill
 </a>
+
+First, attempt to unstack the container in case it is stacked. Then, if [`mode`](#cli-mode) has
+been set `destructive`, empty the container. (If [`mode`](#cli-mode)  is `conservative` then 
+the container is not emptied).
+
+Then runs [`fill`](#cli-fill). If [`mode`](#cli-mode) was `conservative` and therefore the 
+container was not emptied, the fill process will be much faster than if [`mode`](#cli-mode)  is
+set `destructive`.
+
+If multiple container names are passed, they will be processed in the order they are passed 
+on the command line.
+
+If no container names are given, all containers will be refilled in the order specified by 
+the dependency ordering in the configuration file.
 
 <a name="cli-stack">
 #### stack
