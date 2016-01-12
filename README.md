@@ -495,7 +495,8 @@ which ensures that while filling or stacking, that 'mysql' is filled or stacked 
 means that during the 'empty' phase, the 'alfresco' container will be emptied (and therefore 
 unstack attempted) before the 'mysql' container.
 
-If some container names are passed on the command line, for example `grua empty mysql alfresco` 
+If some container names are passed on the command line, for example 
+```grua empty mysql alfresco```
 they will be processed in the order given on the command line.
 
 <a name="cli-refill">
