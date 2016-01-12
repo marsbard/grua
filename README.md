@@ -625,7 +625,7 @@ to explicitly pass in the container names whose Dockerfiles you wish to edit.
 Similarly to `grua edit`, you can be anywhere in the directory tree below the `grua.yaml`
 file and this will work to open any Dockerfile you specify, e.g. 
 ```
-grua edit alfresco share
+$ grua editd alfresco share
 ```
 will edit the Dockerfiles for the `alfresco` and `share` containers in turn.
 
