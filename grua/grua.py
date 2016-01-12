@@ -321,12 +321,13 @@ def empty_container(container, config):
     call(command)
 
 
-def enter_container(which, commands):
+def enter_container(commands):
+    which = commands.popleft()
     run=["/bin/bash"]
     if len(commands) > 0:
         run = list(commands)
-    announce("Entering '" + which[0] + "' container and running: " + str(run))
-    command = ['docker', 'exec', '-ti', get_container(which[0])] + run
+    announce("Entering '" + which + "' container and running: " + str(run))
+    command = ['docker', 'exec', '-ti', get_container(which)] + run
     note(" ".join(command))
     call(command)
 
@@ -358,7 +359,9 @@ def process_command(command_list):
 
     if len(commands) > 0:
         #which = [commands.popleft()]
-        which = commands
+        # exclude here commands which cannot take multiple container names but instead take further args
+        if command != "enter":
+            which = commands
     else:
         deps = sorted_run_deps
         deps.remove('global')
@@ -399,6 +402,9 @@ def process_command(command_list):
             else:
                 container_status(container)
 
+        Mode = get_mode()
+        print "Mode is " + Mode['noisy'] + ", " + Mode['destructive']
+
     elif command == "empty":
         for container in reversed(which):
             unstack_container(container)
@@ -412,10 +418,10 @@ def process_command(command_list):
         fill_container(container, config[container])
             
     elif command == "enter":
-        if len(which) > 1:
-            raise(Exception("You may only enter one container at a time. Please provide container name"))
+        #if len(which) > 1:
+        #    raise(Exception("You may only enter one container at a time. Please provide container name"))
 
-        enter_container(which, commands)
+        enter_container(commands)
 
     elif command == "refstk":
         if len(which) > 1:
