@@ -256,9 +256,9 @@ Equivalent to `docker run -h`
 
 Set the DNS server the container should use to resolve domain queries.
 
-It can be useful to use this in conjuction with (SEE GRUA TEMPLATING) to determine the address of a 
-particular container that will provide you with DNS services for your containers. For example in a 
-setup using consul and registrator, you could specify something like this:
+It can be useful to use this in conjuction with [grua templating](#grua-templating) to determine 
+the address of a particular container that will provide you with DNS services for your containers. 
+For example in a setup using consul and registrator, you could specify something like this:
 
 ```
 postfix:
