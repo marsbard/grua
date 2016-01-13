@@ -206,6 +206,22 @@ require this image using a `before` attribute, see example base configuration in
 which specifies that it must be built before the tomcat container. In that case, the tomcat container
 has `FROM marsbard/base` at the top of its Dockerfile.~~
 
+Specify whether this container may be stacked. If you are building an intermediate base image, upon
+which other images will be based, but will never need to be run itself, then set this to `false`.
+
+Note that the dependency ordering is respected, so when you are building another image from this base 
+it should have its [after](#attrs-after) attribute set to the name of this container, e.g.
+```
+base:
+  build: my-base
+  tag: foobar/base
+  run: false
+dependent: # in the Dockerfile it says 'FROM foobar/base'
+  after: 
+    base
+```
+This will ensure that the 'dependent' image is not built until after the 'base' image has been.
+
 By default this is `true` so you only need to specify it when you don't want the image to be
 run as a container, e.g.:
 
@@ -457,7 +473,7 @@ Replace the template with the [project name](#global-project)
 
 ```
 elasticsearch:
-  # assumes entrypoint defined in docker which calls elasticsearch
+  # this example assumes entrypoint defined in docker which calls elasticsearch
   command: "-Des.node.name=<% GRUA PROJECT %>"
 ```
 
