@@ -434,11 +434,11 @@ mysql:
 ```
 You can use the following template 'commands' as the first entry in the template:
 
-* ENV
+* __ENV__
 
 Replace the template with the content of the named environment variable. See the example above.
 
-* GRUA
+* __GRUA__
 
 Currently only supports two 'subcommands':
 
@@ -461,7 +461,7 @@ elasticsearch:
   command: "-Des.node.name=<% GRUA PROJECT %>"
 ```
 
-* INSPECT <container name> <go template>
+* __INSPECT__ &lt;container name&gt; &lt;go template&gt;
 
 Replace the template with some information from running `docker inspect`.
 
