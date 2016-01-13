@@ -5,6 +5,18 @@ An opinionated declarative docker composition tool with runtime dependencies bet
 
 *https://openclipart.org/detail/176279/shipbuilding-crane*
 
+
+
+* __[Why another composition tool?](#why-another-composition-tool)__
+* __[The grua metaphor](#the-grua-metaphor)__
+* __[The configuration file, grua.yaml](#the-configuration-file-gruayaml)__
+* __[Container configuration](#container-configuration)__
+* __[Grua templating](#grua-templating)__
+* __[Grua command line](#grua-command-line)__
+
+
+
+
 ## Why another composition tool?
 
 `docker-compose` is a great tool if you want to build microservices, and you have well behaved 
@@ -36,12 +48,6 @@ on a dockside stacking containers into a composition (or, indeed, a stack). But 
 metaphor to describe 'filling' a container with an image.
 
 See [grua command line](#grua-command-line)
-
-
-* __[The configuration file, grua.yaml](#the-configuration-file-gruayaml)__
-* __[Container configuration](#container-configuration)__
-* __[Grua templating](#grua-templating)__
-* __[Grua command line](#grua-command-line)__
 
 
 
