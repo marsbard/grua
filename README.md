@@ -442,7 +442,7 @@ Replace the template with the content of the named environment variable. See the
 
 Currently only supports two 'subcommands':
 
-** BRIDGE_IP
+___BRIDGE_IP___
 
 Replace the template with the IP address of the docker bridge.
 
@@ -451,7 +451,7 @@ skydock:
   ports:
     <% GRUA BRIDGE_IP %>:53:53/udp
 ```
-** PROJECT
+___PROJECT___
 
 Replace the template with the [project name](#global-project)
 
