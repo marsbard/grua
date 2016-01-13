@@ -29,7 +29,6 @@ postfix:
   dns: <% INSPECT consul {{ .NetworkSettings.IPAddress }} %>
 ```
 
-
 ## The grua metaphor
 
 'Grua' is Spanish for 'crane'. The metaphor used in `grua` extends the docker metaphor to imagine a crane 
@@ -37,6 +36,14 @@ on a dockside stacking containers into a composition (or, indeed, a stack). But 
 metaphor to describe 'filling' a container with an image.
 
 See [grua command line](#grua-command-line)
+
+
+* __[The configuration file, grua.yaml](#the-configuration-file-gruayaml)__
+* __[Container configuration](#container-configuration)__
+* __[Grua templating](#grua-templating)__
+* __[Grua command line](#grua-command-line)__
+
+
 
 ## The configuration file, `grua.yaml`
 
@@ -212,7 +219,7 @@ base:
   run: false
 dependent: # in the Dockerfile it says 'FROM foobar/base'
   after: 
-    base
+    - base
 ```
 This will ensure that the 'dependent' image is not built until after the 'base' image has been.
 
@@ -431,7 +438,7 @@ solr:
 Within the grua.yaml file, you may add a template to be replaced (at stack time, usually) with 
 some information from your environment or from docker's metadata.
 
-Here's an example of a template. This one uses values from your _current_ environment to 
+Here's an example of a number of templates. These use values from your _current_ environment to 
 pass values through to the environment of the container:
 
 ```
