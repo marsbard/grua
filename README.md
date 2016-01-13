@@ -434,15 +434,15 @@ mysql:
 ```
 You can use the following template 'commands' as the first entry in the template:
 
-___ENV___
+__ENV__
 
 Replace the template with the content of the named environment variable. See the example above.
 
-___GRUA___
+__GRUA__
 
 Currently only supports two 'subcommands':
 
-* __BRIDGE_IP__
+* _BRIDGE_IP_
 
 Replace the template with the IP address of the docker bridge.
 
@@ -451,7 +451,7 @@ skydock:
   ports:
     <% GRUA BRIDGE_IP %>:53:53/udp
 ```
-* __PROJECT__
+* _PROJECT_
 
 Replace the template with the [project name](#global-project)
 
@@ -461,7 +461,7 @@ elasticsearch:
   command: "-Des.node.name=<% GRUA PROJECT %>"
 ```
 
-___INSPECT___ &lt;container name&gt; &lt;go template&gt;
+__INSPECT__ &lt;container name&gt; &lt;go template&gt;
 
 Replace the template with some information from running `docker inspect`.
 
