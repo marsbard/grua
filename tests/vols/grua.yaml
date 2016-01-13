@@ -1,0 +1,7 @@
+global:
+  project: gruatests
+voltest:
+  image: busybox
+  volumes:
+    - data:/data
+  command: "sleep 20"
