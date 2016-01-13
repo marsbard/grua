@@ -414,6 +414,65 @@ solr:
     timeout: 60
 ```
 
+### grua templating
+
+#### in grua.yaml
+
+Within the grua.yaml file, you may add a template to be replaced (at stack time, usually) with 
+some information from your environment or from docker's metadata.
+
+Here's an example of a template. This one uses values from your _current_ environment to 
+pass values through to the environment of the container:
+
+```
+mysql:
+  environment:
+    MYSQL_DATABASE: <% ENV MYSQL_DATABASE %>
+    MYSQL_USER: <% ENV MYSQL_USER %>
+    MYSQL_PASSWORD: <% ENV MYSQL_PASSWORD %>
+    MYSQL_ROOT_PASSWORD: <% ENV MYSQL_ROOT_PASSWORD %>
+```
+You can use the following template 'commands' as the first entry in the template:
+
+* ENV
+
+Replace the template with the content of the named environment variable. See the example above.
+
+* GRUA
+
+Currently only supports two 'subcommands':
+
+** BRIDGE_IP
+
+Replace the template with the IP address of the docker bridge.
+
+```
+skydock:
+  ports:
+    <% GRUA BRIDGE_IP %>:53:53/udp
+```
+** PROJECT
+
+Replace the template with the [project name](#global-project)
+
+```
+elasticsearch:
+  # assumes entrypoint defined in docker which calls elasticsearch
+  command: "-Des.node.name=<% GRUA PROJECT %>"
+```
+
+* INSPECT <container name> <go template>
+
+Replace the template with some information from running `docker inspect`.
+
+```
+solr:
+ dns: <% INSPECT consul {{ .NetworkSettings.IPAddress }} %>
+ after: consul
+```
+Needless to say, the referred to container must already be running in order for `docker inspect` to
+work, so you must make sure to use dependency ordering with [`before`](#attrs-deps-before) and 
+[`after`](#attrs-deps-after) 
 
 ### __grua__ command line
 
