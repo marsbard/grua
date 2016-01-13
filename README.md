@@ -200,12 +200,6 @@ If you specify both `build` and `image` attributes, then `build` will take prefe
 
 * <a name="attrs-stack-run">__run__ (boolean)</a>
 
-confusing ~~If set to `true` then this will be a container to be run. If set to `false` then just an 
-image will be created. In the latter case you probably want to list the container names that will
-require this image using a `before` attribute, see example base configuration in [build](#attrs-fill-build),
-which specifies that it must be built before the tomcat container. In that case, the tomcat container
-has `FROM marsbard/base` at the top of its Dockerfile.~~
-
 Specify whether this container may be stacked. If you are building an intermediate base image, upon
 which other images will be based, but will never need to be run itself, then set this to `false`.
 
