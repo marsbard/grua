@@ -496,8 +496,6 @@ def process_command(command_list):
             print MODE_USAGE
             return
 
-        print_mode()
-
     else:
         raise Exception("Unknown command '" + command + "'")
 

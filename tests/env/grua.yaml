@@ -1,0 +1,8 @@
+global:
+  project: gruatests
+envtest:
+  image: busybox
+  tag: gruatests/envtest
+  environment:
+    GRUA_TEST_ENV: <% ENV GRUA_TEST_ENV %>
+  command: sleep 20
