@@ -229,7 +229,7 @@ def wait_for_up(container, config):
 
         #print output
 
-        if 'output' in locals() and output.find(logmsg) > 0:
+        if 'output' in locals() and output.find(logmsg) > -1:
             ok = True
             break
         else:

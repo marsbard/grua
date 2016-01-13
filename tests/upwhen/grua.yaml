@@ -1,0 +1,8 @@
+global:
+  project: gruatests
+upwhen:
+  image: busybox
+  command: "sh -c 'sleep 3; echo ahem WOOPWOOP'"
+  upwhen:
+    logmsg: "WOOPWOOP"
+    timeout: 10

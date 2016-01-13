@@ -15,8 +15,8 @@ with open(grua.yamlpath + "/grua.yaml", 'r') as stream:
     if grua.config.has_key('global'):
         if grua.config['global'].has_key('project'):
             grua.Project = grua.config['global']['project']
-        if grua.config['global'].has_key('VolumePath'):
-            grua.VolumePath = grua.config['global']['VolumePath']
+        if grua.config['global'].has_key('volumepath'):
+            grua.VolumePath = grua.config['global']['volumepath']
     for container in grua.config:
         grua.calc_deps(container, grua.config)
 
