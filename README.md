@@ -114,7 +114,6 @@ Any volumes you define which do not have a leading slash as part of the local lo
 will be placed relative to this volumepath, but when a leading `/` is found then the absolute 
 path is used ([see volumes](#attrs-stack-volumes)).
 
-
 ### Container configuration
 
 #### Dependency ordering attributes
@@ -187,7 +186,7 @@ base:
     before: 
         - tomcat
 ```
-Also note here that 'before' was specified. Normally this specifies runtime ordering but it also specifies
+Also note here that `before` was specified. Normally this specifies runtime ordering but it also specifies
 build ordering when `run: false` is in effect. In this case, the `tomcat` image is built using 
 `FROM marsbard/base` in the Dockerfile, so it is necessary to build `marsbard/base` first before 
 building the `tomcat` image.
@@ -222,13 +221,14 @@ base:
   build: my-base
   tag: foobar/base
   run: false
-dependent: # in the Dockerfile it says 'FROM foobar/base'
+dependent: 
+  build: dependent # in the Dockerfile it says 'FROM foobar/base'
   after: 
     - base
 ```
 This will ensure that the 'dependent' image is not built until after the 'base' image has been.
 
-By default this is `true` so you only need to specify it when you don't want the image to be
+By default `run` is `true` so you only need to specify it when you don't want the image to be
 run as a container, e.g.:
 
 ```
@@ -240,10 +240,10 @@ tomcat:
 
 * <a name="attrs-stack-options">__options__ (list)</a>
 
-Any docker options for which grua does not provide a replacement may be provided here. 
+Any docker options for which `grua` does not provide a replacement may be provided here. 
 
-_(In fact options for which <b>grua</b> does provide a replacement may also be provided here but 
-be aware that `grua<` names things with the [project](#global-project) attribute from the 
+_(In fact options for which `grua` does provide a replacement may also be provided here but 
+be aware that `grua` names things with the [project](#global-project) attribute from the 
 [global](#global-parameters) section, for example, if the project is `foo`, and the container is 
 defined as `mysql` within `grua.yaml`, then the container that docker will work with will be named 
 `foo_mysql`)_
@@ -735,7 +735,7 @@ before running `grua editd`
 </a>
 
 Currently there are two configurations you can set here. They each have two possible 
-values.
+values. The state of each configuration is persisted under `$HOME/.grua`
 
 * __noisy__ / __quiet__
 
