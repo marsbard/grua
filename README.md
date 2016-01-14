@@ -83,7 +83,7 @@ that isn't supplied, you can use the `options:` stanza as shown above and [also 
 
 ### Global parameters
 
-There is one top level attribute that does not represent a container, and that is the 'global' section.
+There is one top level attribute that does not represent a container, and that is the `__global__` section.
 It can contain the following configuration items:
 
 * <a name="global-project">__project__</a>
