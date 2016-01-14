@@ -226,7 +226,7 @@ dependent:
   after: 
     - base
 ```
-This will ensure that the 'dependent' image is not built until after the 'base' image has been.
+This will ensure that the `dependent` image is not built until after the `base` image has been.
 
 By default `run` is `true` so you only need to specify it when you don't want the image to be
 run as a container, e.g.:
@@ -280,7 +280,7 @@ Set the DNS server the container should use to resolve domain queries.
 
 It can be useful to use this in conjuction with [grua templating](#grua-templating) to determine 
 the address of a particular container that will provide you with DNS services for your containers. 
-For example in a setup using consul and registrator, you could specify something like this:
+For example in a setup using consul, you could specify something like this:
 
 ```
 postfix:
@@ -426,7 +426,7 @@ httpd:
 > If 'logmsg' is not present this has no effect.
 
 
-By default grua will wait up to 30 seconds for the requirements to be met before throwing an exception 
+By default `grua` will wait up to 30 seconds for the requirements to be met before throwing an exception 
 but you can change the timeout, e.g.:
 
 ```
@@ -456,11 +456,11 @@ mysql:
 ```
 You can use the following template 'commands' as the first entry in the template:
 
-__ENV__
+__ENV__ &lt;variable name&gt;
 
 Replace the template with the content of the named environment variable. See the example above.
 
-__GRUA__
+__GRUA__ &lt;'subcommand'&gt;
 
 Currently only supports two 'subcommands':
 
