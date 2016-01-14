@@ -458,7 +458,7 @@ You can use the following template 'commands' as the first entry in the template
 
 __ENV__ &lt;variable name&gt;
 
-Replace the template with the content of the named environment variable. See the example above.
+Replace the template with the content of the named environment variable. See the examples above.
 
 __GRUA__ &lt;'subcommand'&gt;
 
@@ -535,7 +535,7 @@ filled the grua container (that's the torture bit of the docker metaphor).
 
 Then, instead of `docker run`, I have `grua stack`, where your containers are stacked into a 
 composition. This is the same as `docker run` but because of the dependency ordering feature as well 
-as the ability of waiting for a container to be completely ready before stacking the next one, 
+as the ability of waiting for a container to be completely ready before initiating the next one, 
 stacking seemed like a better metaphor to me.
 
 <a name="cli-fill">
@@ -567,7 +567,7 @@ this tends to remove all the intermediate containers from the cache too, so fill
 again will not have any cached images to rely on and thus will take longer to fill.
 
 You probably don't want to use this, unless you know that the images will not be used on this 
-server again.
+host again.
 
 If no container names are passed, all containers will be emptied in reverse order to the dependencies
 listed in the configuration, for example, this config fragment:
