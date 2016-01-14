@@ -20,17 +20,16 @@ An opinionated declarative docker composition tool with runtime dependencies bet
 ## Why another composition tool?
 
 `docker-compose` is a great tool if you want to build microservices, and you have well behaved 
-containers that can tolerate dependent services not being readily available, but in the real 
+containers that can tolerate depended-upon services not being readily available, but in the real 
 world, when you are dockerising a complex monolithic application, you might find that if 
 containers come up out of order that even when the dependencies become available, the target 
 application fails to start properly.
 
-So `grua` adds explicit dependency ordering to container composition, by use of  
-[`before`](#attrs-deps-before) and [`after`](#attrs-deps-after) attributes in container 
-configuration. Furthermore, rather than just firing the next container as soon as docker has 
-started the previous one, you can wait for a specific message in the log output before starting 
-the next container. This can give you confidence that each dependency is ready before starting 
-your main application.
+So `grua` adds explicit dependency ordering to container composition, by use of [`before`](#attrs-deps-before) 
+and [`after`](#attrs-deps-after) attributes in container configuration. Furthermore, rather than 
+just firing the next container as soon as docker has started the previous one, you can wait for a 
+specific message in the log output before starting the next container. This can give you confidence 
+that each dependency is ready before starting your main application.
 
 Additionally you get the capability to use any data you can find from `docker inspect` on an already 
 running container within the configuration of another container, typically that looks like this:
@@ -566,6 +565,9 @@ Empty the grua containers. First `grua` attempts to unstack the container, if th
 not stacked a harmless error is reported. Then the image is removed using `docker rmi`. Note that
 this tends to remove all the intermediate containers from the cache too, so filling the container
 again will not have any cached images to rely on and thus will take longer to fill.
+
+You probably don't want to use this, unless you know that the images will not be used on this 
+server again.
 
 If no container names are passed, all containers will be emptied in reverse order to the dependencies
 listed in the configuration, for example, this config fragment:
