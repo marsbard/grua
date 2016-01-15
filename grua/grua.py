@@ -95,7 +95,27 @@ def tpl_lookup(template):
     words.pop(0)
 
     if selecta == "ENV":
-        return os.environ.get(words[0], '')
+        # declaration something like <% ENV VARNAME %> or <% ENV VARNAME | default value words words words %>
+
+        # varname is first
+        varname = words.pop(0)
+
+
+        # strip the first pipe character if found
+        if("|" in words):
+            words.remove('|')
+
+
+        #print varname
+        #print ' '.join(words)
+
+
+        # use remaining words if any as default if the varname not found in the environment
+        value = os.environ.get(varname, ' '.join(words))
+
+        #print value
+        return value
+
 
     if selecta == "INSPECT":
         container = words[0]
@@ -209,39 +229,44 @@ def wait_for_up(container, config):
         else:
             mention("Waiting for '" + logmsg + "' to indicate that " + container + " is stacked")
 
-    waited = 0
-    ok = False
-    while waited <= timeout:
-        if not 'logfile' in locals():
-            command = ["docker", "logs", get_container(container)]
-        else:
-            if logfile.startswith('/'):
-                command = ["tail", logfile]
+        waited = 0
+        ok = False
 
+        while waited <= timeout:
+            if not 'logfile' in locals():
+                command = ["docker", "logs", get_container(container)]
             else:
-                # there's a chance we try to tail it before it exists... just ignore that time
-                if os._exists(logfile):
+                if logfile.startswith('/'):
                     command = ["tail", logfile]
 
+                else:
+                    # there's a chance we try to tail it before it exists... just ignore that time
+                    if os._exists(logfile):
+                        command = ["tail", logfile]
 
-        if 'command' in locals():
-            output = subprocess.check_output(command, stderr=subprocess.STDOUT)
 
-        #print output
+            # command may not have been set yet if the file didn't exist
+            if 'command' in locals():
+                try:
+                    output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+                except:
+                    pass
+            #print output
 
-        if 'output' in locals() and output.find(logmsg) > -1:
-            ok = True
-            break
-        else:
-            time.sleep(1)
-            waited = waited + 1
+            if 'output' in locals() and output.find(logmsg) > -1:
+                ok = True
+                break
+            else:
+                time.sleep(1)
+                waited = waited + 1
+
+        if not ok:
+            raise Exception("Timed out waiting for " + container + " to start")
 
     if upwhen.has_key('sleep'):
         mention("Sleeping " + str(upwhen['sleep']) + " extra seconds as configured")
         time.sleep(int(upwhen['sleep']))
 
-    if not ok:
-        raise Exception("Timed out waiting for " + container + " to start")
 
 
 def get_image(config):

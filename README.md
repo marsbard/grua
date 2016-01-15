@@ -449,9 +449,9 @@ pass values through to the environment of the container:
 ```
 mysql:
   environment:
-    MYSQL_DATABASE: <% ENV MYSQL_DATABASE %>
-    MYSQL_USER: <% ENV MYSQL_USER %>
-    MYSQL_PASSWORD: <% ENV MYSQL_PASSWORD %>
+    MYSQL_DATABASE: <% ENV MYSQL_DATABASE | alfresco %>
+    MYSQL_USER: <% ENV MYSQL_USER | alfuser %>
+    MYSQL_PASSWORD: <% ENV MYSQL_PASSWORD  %>
     MYSQL_ROOT_PASSWORD: <% ENV MYSQL_ROOT_PASSWORD %>
 ```
 You can use the following template 'commands' as the first entry in the template:
@@ -459,6 +459,15 @@ You can use the following template 'commands' as the first entry in the template
 __ENV__ &lt;variable name&gt;
 
 Replace the template with the content of the named environment variable. See the examples above.
+
+Optionally you may add a pipe character followed by some default value, which can be any number of
+words.
+
+```
+solr:
+  environment:
+    ADMIN_NAME: <% ENV SOLR_ADMIN_NAME | Duty Administrator %>
+```
 
 __GRUA__ &lt;'subcommand'&gt;
 

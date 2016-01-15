@@ -5,4 +5,7 @@ envtest:
   tag: gruatests/envtest
   environment:
     GRUA_TEST_ENV: <% ENV GRUA_TEST_ENV %>
+    GRUA_TEST_DEFAULT: <% ENV GRUA_TEST_DEFAULT | This is the default value %>
   command: sleep 20
+  upwhen: 
+    sleep: 2
