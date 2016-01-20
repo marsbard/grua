@@ -6,7 +6,7 @@ An opinionated declarative docker composition tool with runtime dependencies bet
 *https://openclipart.org/detail/176279/shipbuilding-crane*
 
 
-
+* __[Installation](#installation)__
 * __[Why another composition tool?](#why-another-composition-tool)__
 * __[The grua metaphor](#the-grua-metaphor)__
 * __[The configuration file, grua.yaml](#the-configuration-file-gruayaml)__
@@ -16,6 +16,15 @@ An opinionated declarative docker composition tool with runtime dependencies bet
 
 
 
+## Installation
+
+`$ git clone https://github.com/marsbard/grua.git` 
+
+Or else see the [releases page](https://github.com/marsbard/grua/releases) to see if there
+are any stable releases (hint, there aren't, yet).
+
+`$ cd grua`
+`$ ./install`
 
 ## Why another composition tool?
 
