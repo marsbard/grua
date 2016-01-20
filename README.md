@@ -24,6 +24,7 @@ Or else see the [releases page](https://github.com/marsbard/grua/releases) to se
 are any stable releases (hint, there aren't, yet).
 
 `$ cd grua`
+
 `$ ./install`
 
 ## Why another composition tool?
