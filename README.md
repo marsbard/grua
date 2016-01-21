@@ -8,6 +8,7 @@ An opinionated declarative docker composition tool with runtime dependencies bet
 
 * __[Installation](#installation)__
 * __[Why another composition tool?](#why-another-composition-tool)__
+* __[A real example](#a-real-example)__
 * __[The grua metaphor](#the-grua-metaphor)__
 * __[The configuration file, grua.yaml](#the-configuration-file-gruayaml)__
 * __[Container configuration](#container-configuration)__
@@ -49,6 +50,20 @@ postfix:
   hostname: postfix
   dns: <% INSPECT consul {{ .NetworkSettings.IPAddress }} %>
 ```
+
+## A real example
+
+Grua was developed because of a perceived lack in the currently available tools (fig, docker-compose, crowdr)
+in dealing with legacy "multi-monolithic" applications consisting of disparate systems and modules
+often installed on the same server. The particular application it was designed to assist dockerisation of 
+is the Alfresco Enterprise Content Management System (http://alfresco.com). Alfresco consists of several 
+tomcat applications, a database server, a search index server and many optional components. In the first
+iteration of `docker-alfresco` we've tried to create an example of a basic, but full featured and fully 
+functional application being built with the grua machinery.
+
+Take a look at [docker-alfresco](https://github.com/marsbard/docker-alfresco) for an example that exercises 
+almost all of what is available in the grua system today.
+
 
 ## The grua metaphor
 
