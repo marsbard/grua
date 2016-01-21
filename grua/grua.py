@@ -85,7 +85,7 @@ def topological_sort(source):
 def inspect_container(container, go_template):
     command = ['docker', 'inspect', '-f', (" ").join(go_template), get_container(container)]
 
-    note(" ".join(command))
+    #1  note(" ".join(command))
     return subprocess.check_output(command, stderr=subprocess.STDOUT).strip()
 
 def tpl_lookup(template):
@@ -100,20 +100,17 @@ def tpl_lookup(template):
         # varname is first
         varname = words.pop(0)
 
-
         # strip the first pipe character if found
         if("|" in words):
             words.remove('|')
 
-
-        #print varname
-        #print ' '.join(words)
-
-
         # use remaining words if any as default if the varname not found in the environment
-        value = os.environ.get(varname, ' '.join(words))
+        default = ' '.join(words)
+        value = os.environ.get(varname, '')
 
-        #print value
+        if value == '':
+            value = default
+
         return value
 
 

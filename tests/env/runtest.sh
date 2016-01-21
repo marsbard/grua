@@ -8,6 +8,8 @@ grua mode quiet
 grua fill
 
 export GRUA_TEST_ENV="asd123poi" 
+export GRUA_TEST_DEFAULT2="Overridden"
+
 grua stack
 
 sleep 1
@@ -41,6 +43,18 @@ else
 	RESULT=99
 fi
 
+echo ">> Checking default value override"
+CHECK2=$(grua enter envtest sh -c "echo \$GRUA_TEST_DEFAULT2" | sed "s/\r//g")
+
+sleep 1
+if [ "$CHECK2" = "Overridden" ]
+then
+	echo "[OK] env test passed: $CHECK2"
+	RESULT=0
+else
+	echo "[ER] env test failed: $CHECK2"
+	RESULT=99
+fi
 
 grua unstack
 sleep 1

@@ -6,6 +6,7 @@ envtest:
   environment:
     GRUA_TEST_ENV: <% ENV GRUA_TEST_ENV %>
     GRUA_TEST_DEFAULT: <% ENV GRUA_TEST_DEFAULT | This is the default value %>
+    GRUA_TEST_DEFAULT2: <% ENV GRUA_TEST_DEFAULT2 | This is the default value 2 %>
   command: sleep 20
   upwhen: 
     sleep: 2
