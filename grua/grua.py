@@ -293,8 +293,8 @@ def stack_container(container, config):
 
     if config.has_key('hostname'):
         command = command + ['--hostname', get_value(config, 'hostname')]
-    else:
-        command = command + ['--hostname', container]
+    #else:
+    #    command = command + ['--hostname', container]
 
     if config.has_key('dns'):
         command = command + ['--dns', get_value(config, 'dns')]
