@@ -176,11 +176,12 @@ def calc_deps(container, config):
 def fill_container(container, config):
     announce("Filling "  + container + " container")
     if config.has_key('build'):
-        tag = Project + "/" + container
+        build = get_value(config, 'build')
+        tag = Project + "/" + build
+
         if config.has_key('tag'):
             tag = get_value(config, 'tag')
 
-        build = get_value(config, 'build')
         target = build
         if build[:4] == 'git:':
             if not config.has_key('tag'):
