@@ -51,5 +51,5 @@ else:
         print(exc_type, fname, exc_tb.tb_lineno)
         print "!!!"
         print
-        raise
+        #raise
         sys.exit(99)
