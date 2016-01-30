@@ -222,10 +222,10 @@ def wait_for_up(container, config):
 
         if upwhen.has_key('logfile'):
             logfile = VolumePath + "/" + Project + "/" + container + "/" + get_value(upwhen, 'logfile')
-            mention("Waiting for '" + logmsg + "' in '" + logfile + "' to indicate that " + container + " is stacked")
+            mention("Waiting up to " + str(timeout) + " seconds for '" + logmsg + "' in '" + logfile + "' to indicate that " + container + " is stacked")
 
         else:
-            mention("Waiting for '" + logmsg + "' to indicate that " + container + " is stacked")
+            mention("Waiting up to " + str(timeout) + " seconds for '" + logmsg + "' to indicate that " + container + " is stacked")
 
         waited = 0
         ok = False
@@ -302,10 +302,11 @@ def stack_container(container, config):
 
     if config.has_key('volumes'):
         for volumespec in config['volumes']:
-            if volumespec.startswith("/"):
-                command = command + ['-v', parse_template(volumespec)]
+            volumespec_parsed =  parse_template(volumespec)
+            if volumespec_parsed.startswith("/"):
+                command = command + ['-v', volumespec_parsed]
             else:
-                command = command + ['-v', VolumePath + "/" + Project + "/" + container + "/" + parse_template(volumespec)]
+                command = command + ['-v', VolumePath + "/" + Project + "/" + container + "/" + volumespec_parsed]
 
     if config.has_key('ports'):
         for portspec in config['ports']:
