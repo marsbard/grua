@@ -28,6 +28,8 @@ are any stable releases (hint, there aren't, yet).
 
 `$ ./install`
 
+If you get an error about "No module named yaml", please run `pip install pyyaml`.
+
 ## Why another composition tool?
 
 `docker-compose` is a great tool if you want to build microservices, and you have well behaved 
