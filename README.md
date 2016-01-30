@@ -366,20 +366,30 @@ mysql:
 Equivalent to the `-e` switch to `docker run`, this will make each element of the environment hash
 available in the environment of the relevant container.
 
-* <a name="attrs-stack-link">__link__ (list)</a>
+* <a name="attrs-stack-links">__links__ (list)</a>
 
-Equivalent to `--link=<container name>` but it prepends the value of [project](#global-project) to
-the container name.
+Make a link between docker containers for each member of the list. Equivalent to `--link=<link name>` 
+but it prepends the value of [project](#global-project) to the link name.
 
 ```
 global:
   project: alf
 registrator:
-  link:
+  links:
     - consul
 ```
 
-In actual fact, from docker's point of view, in this case the container that is linked to will be `alf_consul`
+By default this will prepend the value of [project](#global-project) to the link name, in this example
+the link name will be `alf_consul`, you can override this by specifying the container's view of the 
+link name in the usual way:
+```
+global:
+  project: alf
+registrator:
+  links:
+    - consul:consul
+```
+Now the link name (`--link=<link name>`) will be `consul` instead of `alf_consul`.
 
 * <a name="attrs-stack-command">__command__ (value)</a>
 
@@ -646,9 +656,9 @@ ordering defined in the [configuration file](#the-configuration-file-gruayaml) a
 as possibly [waiting for  containers to become ready](#attrs-stack-upwhen).
 
 You can specify a number of containers to stack but if a container to be stacked depends
-directly on a container which is not stacked (for instance it is [linked](#attrs-stack-link)),
+directly on a container which is not stacked (for instance it is [linked](#attrs-stack-links)),
 then the stacking may fail. You're ok to start containers that are out of order with respect
-to the configuration, as long as they don't have direct dependencies like [link](#attrs-stack-link)
+to the configuration, as long as they don't have direct dependencies like [link](#attrs-stack-links)
 
 If the config item `run: false` is set for a container, that container is not stacked.
 

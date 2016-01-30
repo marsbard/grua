@@ -316,8 +316,8 @@ def stack_container(container, config):
         for envvar in config['environment']:
             command = command + ['-e', parse_template(envvar) + '=' + parse_template(config['environment'][envvar])]
 
-    if config.has_key('link'):
-        for link in config['link']:
+    if config.has_key('links'):
+        for link in config['links']:
             command = command + ["--link=" + get_container(parse_template(link))]
 
     command.append(get_image(config))
