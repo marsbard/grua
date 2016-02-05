@@ -2,10 +2,27 @@
 import shutil, os.path, time, subprocess, shlex, re
 from collections import deque
 from subprocess import call
+from test import run_tests
+
+
+class Global:
+    def __init__(self):
+        self.dict = {}
+
+    def get(self, key):
+        return self.dict[key]
+
+    def set(self, key, val):
+        self.dict[key] = val
+
+
+G = Global()
 
 Project = 'grua'  # gets replaced by 'project' value in 'global' from grua.yaml
 GruaBase = '/var/lib/grua'
-VolumePath = GruaBase + '/volumes' # replaced by 'global/volumepath' in grua.yaml
+
+G.set("volumePath", GruaBase + "/volumes")
+
 ConfigPath = os.environ["HOME"] + "/.grua"
 
 yaml_path = "."
@@ -221,7 +238,7 @@ def wait_for_up(container, config):
         logmsg = get_value(upwhen, 'logmsg')
 
         if upwhen.has_key('logfile'):
-            logfile = VolumePath + "/" + Project + "/" + container + "/" + get_value(upwhen, 'logfile')
+            logfile = G.get('volumePath') + "/" + Project + "/" + container + "/" + get_value(upwhen, 'logfile')
             mention("Waiting up to " + str(timeout) + " seconds for '" + logmsg + "' in '" + logfile + "' to indicate that " + container + " is stacked")
 
         else:
@@ -306,7 +323,7 @@ def stack_container(container, config):
             if volumespec_parsed.startswith("/"):
                 command = command + ['-v', volumespec_parsed]
             else:
-                command = command + ['-v', VolumePath + "/" + Project + "/" + container + "/" + volumespec_parsed]
+                command = command + ['-v', G.get('volumePath') + "/" + Project + "/" + container + "/" + volumespec_parsed]
 
     if config.has_key('ports'):
         for portspec in config['ports']:
@@ -519,6 +536,9 @@ def process_command(command_list):
         else:
             print MODE_USAGE
             return
+
+    elif command == "test":
+        run_tests()
 
     else:
         raise Exception("Unknown command '" + command + "'")
