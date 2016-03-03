@@ -33,10 +33,41 @@ def note(msg, ignore_quiet=False):
 
 
 def find_bridge_ip():
-    command = ["ip", "addr", "show", "dev", "docker0"]
-    sp = subprocess.Popen((command), stdout=subprocess.PIPE)
+    done = False
+    try:
+        command = ["ip", "addr", "show", "dev", "docker0"]
+        sp = subprocess.Popen(command, stdout=subprocess.PIPE)
 
-    output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split()[1].split('/')[0]
+        output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split()[1].split('/')[0]
+
+        done = True
+
+    except OSError as e:
+        if e.errno == os.errno.ENOENT:
+            # handle file not found error.
+            done=False
+        else:
+            # Something else went wrong while trying to run `wget`
+            raise
+
+    if not done:
+        try:
+            command = ["ifconfig", "docker0"]
+
+            sp = subprocess.Popen(command, stdout=subprocess.PIPE)
+
+            output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split(':')[1].split()[0]
+
+        except OSError as e:
+            if e.errno == os.errno.ENOENT:
+                # handle file not found error.
+                done = False
+            else:
+                # Something else went wrong while trying to run `wget`
+                raise
+
+    if not done:
+        raise Exception("Could not find either 'ip' or 'ifconfig' in PATH")
 
     sp.wait()
 
@@ -47,6 +78,8 @@ def find_bridge_ip():
         raise Exception(output + " is not a valid IP address for BridgeIP")
 
     return output
+
+
 
 BridgeIp = find_bridge_ip()
 
