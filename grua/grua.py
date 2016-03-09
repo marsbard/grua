@@ -2,32 +2,22 @@
 import shutil, os.path, time, subprocess, shlex, re
 from collections import deque
 from subprocess import call
+from mem import mem
 
-Project = 'grua'  # gets replaced by 'project' value in 'global' from grua.yaml
-GruaBase = '/var/lib/grua'
-VolumePath = GruaBase + '/volumes'  # replaced by 'global/volumepath' in grua.yaml
-ConfigPath = os.environ["HOME"] + "/.grua"
-
-yaml_path = "."
-config = {}
-sorted_run_deps = []
-
-UnstackTimeout = 15
-Dependencies = dict()
 
 
 def announce(msg, ignore_quiet=False):
-    if Mode['noisy'] == 'noisy' or ignore_quiet:
+    if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
         print "\n>>> " + msg + "\n"
 
 
 def mention(msg, ignore_quiet=False):
-    if Mode['noisy'] == 'noisy' or ignore_quiet:
+    if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
         print ">> " + msg
 
 
 def note(msg, ignore_quiet=False):
-    if Mode['noisy'] == 'noisy' or ignore_quiet:
+    if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
         print "> " + msg
 
 
@@ -78,7 +68,7 @@ def find_bridge_ip():
     return output
 
 
-BridgeIp = find_bridge_ip()
+mem.BridgeIp = find_bridge_ip()
 
 
 # http://stackoverflow.com/a/11564323
@@ -149,9 +139,9 @@ def tpl_lookup(template):
         key = words[0]
         words.pop(0)
         if key == 'BRIDGE_IP':
-            return BridgeIp
+            return mem.BridgeIp
         if key == "PROJECT":
-            return Project
+            return mem.Project
 
 
 def parse_template(tpl):
@@ -178,30 +168,30 @@ def get_value(dict, key):
 
 def calc_deps(container, config):
     for key in config[container]:
-        if not Dependencies.has_key(container):
-            Dependencies[container] = []
+        if not mem.Dependencies.has_key(container):
+            mem.Dependencies[container] = []
         val = config[container][key]
         if key == "before":
             for before in val:
-                if before not in Dependencies:
-                    Dependencies[before] = [container]
+                if before not in mem.Dependencies:
+                    mem.Dependencies[before] = [container]
                 else:
-                    Dependencies[before].append(container)
+                    mem.Dependencies[before].append(container)
 
         if key == "after":
-            if container not in Dependencies:
-                Dependencies[container] = val
+            if container not in mem.Dependencies:
+                mem.Dependencies[container] = val
             else:
                 for after in val:
-                    if after not in Dependencies[container]:
-                        Dependencies[container].append(after)
+                    if after not in mem.Dependencies[container]:
+                        mem.Dependencies[container].append(after)
 
 
 def fill_container(container, config):
     announce("Filling " + container + " container")
     if config.has_key('build'):
         build = get_value(config, 'build')
-        tag = Project + "/" + build
+        tag = mem.Project + "/" + build
 
         if config.has_key('tag'):
             tag = get_value(config, 'tag')
@@ -245,7 +235,7 @@ def wait_for_up(container, config):
         logmsg = get_value(upwhen, 'logmsg')
 
         if upwhen.has_key('logfile'):
-            logfile = VolumePath + "/" + Project + "/" + container + "/" + get_value(upwhen, 'logfile')
+            logfile = mem.VolumePath + "/" + mem.Project + "/" + container + "/" + get_value(upwhen, 'logfile')
             mention("Waiting up to " + str(
                 timeout) + " seconds for '" + logmsg + "' in '" + logfile + "' to indicate that " + container + " is stacked")
 
@@ -297,13 +287,13 @@ def get_image(config):
     elif config.has_key('tag'):
         image = get_value(config, 'tag')
     else:
-        image = Project + '/' + get_value(config, 'build')
+        image = mem.Project + '/' + get_value(config, 'build')
 
     return image
 
 
 def get_container(name):
-    return Project + "_" + name
+    return mem.Project + "_" + name
 
 
 def stack_container(container, config):
@@ -404,15 +394,15 @@ def enter_container(commands):
 
 
 def edit_yaml():
-    announce("Editing " + yamlpath)
-    command = [os.environ['EDITOR'], yamlpath + '/grua.yaml']
+    announce("Editing " + mem.yamlpath)
+    command = [os.environ['EDITOR'], mem.yamlpath + '/grua.yaml']
     note(" ".join(command))
     call(command)
 
 
 def edit_dockerfile(container):
     announce("Editing dockerfile for " + container)
-    command = [os.environ['EDITOR'], yamlpath + '/' + container + "/Dockerfile"]
+    command = [os.environ['EDITOR'], mem.yamlpath + '/' + container + "/Dockerfile"]
     note(" ".join(command))
     call(command)
 
@@ -435,25 +425,25 @@ def process_command(command_list):
         if command != "enter":
             which = commands
     else:
-        deps = sorted_run_deps
+        deps = mem.sorted_run_deps
         deps.remove('global')
         which = deps
 
     if command == 'fill':
         for container in which:
-            fill_container(container, config[container])
+            fill_container(container, mem.config[container])
 
     elif command == 'stack':
         for container in which:
-            if config[container].has_key('run') and not config[container]['run']:
+            if mem.config[container].has_key('run') and not mem.config[container]['run']:
                 pass
             else:
-                stack_container(container, config[container])
+                stack_container(container, mem.config[container])
 
     elif command == 'unstack':
         for container in reversed(which):
 
-            if config[container].has_key('run') and not config[container]['run']:
+            if mem.config[container].has_key('run') and not mem.config[container]['run']:
                 pass
             else:
                 unstack_container(container)
@@ -461,15 +451,15 @@ def process_command(command_list):
     elif command == 'restack':
         for container in which:
 
-            if config[container].has_key('run') and not config[container]['run']:
+            if mem.config[container].has_key('run') and not mem.config[container]['run']:
                 pass
             else:
                 unstack_container(container)
-                stack_container(container, config[container])
+                stack_container(container, mem.config[container])
 
     elif command == "status":
         for container in which:
-            if config[container].has_key('run') and not config[container]['run']:
+            if mem.config[container].has_key('run') and not mem.config[container]['run']:
                 pass
             else:
                 container_status(container)
@@ -480,14 +470,14 @@ def process_command(command_list):
     elif command == "empty":
         for container in reversed(which):
             unstack_container(container)
-            empty_container(container, config[container])
+            empty_container(container, mem.config[container])
 
     elif command == "refill":
         for container in which:
             unstack_container(container)
         if Mode['destructive'] == 'destructive':
-            empty_container(container, config[container])
-        fill_container(container, config[container])
+            empty_container(container, mem.config[container])
+        fill_container(container, mem.config[container])
 
     elif command == "enter":
         # if len(which) > 1:
@@ -503,16 +493,16 @@ def process_command(command_list):
 
         unstack_container(container)
         if Mode['destructive'] == 'destructive':
-            empty_container(container, config[container])
-        fill_container(container, config[container])
-        stack_container(container, config[container])
+            empty_container(container, mem.config[container])
+        fill_container(container, mem.config[container])
+        stack_container(container, mem.config[container])
 
     elif command == "edit":
         edit_yaml()
 
     elif command == "editd":
         for container in which:
-            if config[container].has_key('build'):
+            if mem.config[container].has_key('build'):
                 edit_dockerfile(container)
 
     elif command == "mode":
@@ -521,7 +511,7 @@ def process_command(command_list):
             print_mode()
             return
         mode = command_list[1]
-        config_path = ConfigPath + "/" + Project
+        config_path = mem.ConfigPath + "/" + mem.Project
 
         quietFile = config_path + "/quiet"
         noisyFile = config_path + "/noisy"
@@ -559,13 +549,13 @@ def touch(fname, times=None):
 
 def sort_containers():
     tups = list()
-    for dep in Dependencies.keys():
-        tups.append((dep, Dependencies[dep]))
+    for dep in mem.Dependencies.keys():
+        tups.append((dep, mem.Dependencies[dep]))
 
     s = topological_sort(tups)
 
     sorted = list();
-    for dummy in Dependencies:
+    for dummy in mem.Dependencies:
         sorted.append(s.next())
     return sorted
 
@@ -583,9 +573,9 @@ def find_yaml_location():
 def get_mode():
     noisy = 'noisy'
     destructive = 'destructive'
-    if os.path.isfile(ConfigPath + "/" + Project + "/quiet"):
+    if os.path.isfile(mem.ConfigPath + "/" + mem.Project + "/quiet"):
         noisy = 'quiet'
-    if os.path.isfile(ConfigPath + "/" + Project + "/conservative"):
+    if os.path.isfile(mem.ConfigPath + "/" + mem.Project + "/conservative"):
         destructive = 'conservative'
 
     return {"noisy": noisy, "destructive": destructive}
