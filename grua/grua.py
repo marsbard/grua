@@ -322,7 +322,7 @@ def stack_container(container, config):
             if volumespec_parsed.startswith("/"):
                 command = command + ['-v', volumespec_parsed]
             else:
-                command = command + ['-v', VolumePath + "/" + Project + "/" + container + "/" + volumespec_parsed]
+                command = command + ['-v', mem.VolumePath + "/" + Project + "/" + container + "/" + volumespec_parsed]
 
     if config.has_key('ports'):
         for portspec in config['ports']:
