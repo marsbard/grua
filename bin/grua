@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from grua import grua
+from grua.deps import calc_deps
 from grua.mem import mem
 import yaml
 import sys
@@ -21,7 +22,7 @@ with open(mem.yaml_path + "/grua.yaml", 'r') as stream:
         if mem.config['global'].has_key('volumepath'):
             mem.VolumePath = mem.config['global']['volumepath']
     for container in mem.config:
-        grua.calc_deps(container, mem.config)
+        calc_deps(container, mem.config)
 
 # set up configuration path
 try:
