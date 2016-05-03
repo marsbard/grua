@@ -1,8 +1,9 @@
 import subprocess, os, shutil, time, shlex
 from subprocess import call
-
+from mem import mem
 from util import announce, mention, note
 from templater import get_value, parse_template
+
 
 def get_image(config):
     if config.has_key('image'):
@@ -13,6 +14,7 @@ def get_image(config):
         image = mem.Project + '/' + get_value(config, 'build')
 
     return image
+
 
 def get_container(name):
     return mem.Project + "_" + name
@@ -61,7 +63,6 @@ def empty_container(container, config):
     command = ['docker', 'rmi', get_image(config)]
     note(" ".join(command))
     call(command)
-
 
 
 def stack_container(container, config):
@@ -127,8 +128,6 @@ def unstack_container(container):
     call(command)
 
 
-
-
 def inspect_container(container, go_template):
     command = ['docker', 'inspect', '-f', " ".join(go_template), get_container(container)]
 
@@ -147,7 +146,6 @@ def enter_container(commands):
     call(command)
 
 
-
 def container_status(container):
     command = ['docker', 'inspect', '--format="{{.State.Status}}"', get_container(container)]
     # note(" ".join(command))
@@ -162,8 +160,6 @@ def container_status(container):
 
     ignore_quiet = True
     mention(container + ": " + output, ignore_quiet),
-
-
 
 
 def wait_for_up(container, config):

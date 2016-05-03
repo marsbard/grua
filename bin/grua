@@ -2,16 +2,18 @@
 
 from grua import grua
 from grua.mem import mem
-import yaml, sys, errno, os
+import yaml
+import sys
+import errno
+import os
 
 args = sys.argv[1:]
 
+mem.yaml_path = grua.find_yaml_location()
 
-mem.yamlpath = grua.find_yaml_location()
+os.chdir(mem.yaml_path)
 
-os.chdir(mem.yamlpath)
-
-with open(mem.yamlpath + "/grua.yaml", 'r') as stream:
+with open(mem.yaml_path + "/grua.yaml", 'r') as stream:
     mem.config = yaml.load(stream)
     if mem.config.has_key('global'):
         if mem.config['global'].has_key('project'):
