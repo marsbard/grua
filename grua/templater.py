@@ -1,5 +1,5 @@
 import os
-from docker import inspect_container
+import docker
 from mem import mem
 
 
@@ -31,7 +31,7 @@ def tpl_lookup(template):
     if selecta == "INSPECT":
         container = words[0]
         words.pop(0)
-        return inspect_container(container, words)
+        return docker.inspect_container(container, words)
 
     if selecta == "GRUA":
         key = words[0]

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from collections import deque
-from mem import mem
 from util import find_bridge_ip, touch
 from docker import *
 

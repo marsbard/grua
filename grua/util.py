@@ -20,7 +20,7 @@ def note(msg, ignore_quiet=False):
 
 
 def find_bridge_ip():
-    done = False
+
     try:
         command = ["ip", "addr", "show", "dev", "docker0"]
         sp = subprocess.Popen(command, stdout=subprocess.PIPE)
@@ -32,6 +32,7 @@ def find_bridge_ip():
     except OSError as e:
         if e.errno == os.errno.ENOENT:
             # handle file not found error.
+            print "File not found"
             done = False
         else:
             # Something else went wrong
