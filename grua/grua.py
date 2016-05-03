@@ -60,6 +60,23 @@ def get_mode():
     return {"noisy": noisy, "destructive": destructive}
 
 
+def run_tests():
+
+    # create new volumepath for this test run
+
+    orig_path = mem.VolumePath
+
+    mem.VolumePath += "_tests"
+
+    shutil.rmtree(mem.VolumePath, True)
+    os.mkdir(mem.VolumePath)
+
+    # TODO - Actually run some tests here with the cleared down volume_path
+
+    # reset volume path
+    mem.VolumePath = orig_path
+
+
 def usage():
     Mode = get_mode()
     print "                grua\n                ----"
