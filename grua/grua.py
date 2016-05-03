@@ -2,72 +2,72 @@
 import shutil, os.path, time, subprocess, shlex, re
 from collections import deque
 from subprocess import call
-from test import run_tests
-
-
-class Global:
-    def __init__(self):
-        self.dict = {}
-
-    def get(self, key):
-        return self.dict[key]
-
-    def set(self, key, val):
-        self.dict[key] = val
-
-
-G = Global()
-
-Project = 'grua'  # gets replaced by 'project' value in 'global' from grua.yaml
-GruaBase = '/var/lib/grua'
-
-G.set("volumePath", GruaBase + "/volumes")
-
-ConfigPath = os.environ["HOME"] + "/.grua"
-
-yaml_path = "."
-config = {}
-sorted_run_deps = []
-
-UnstackTimeout = 15
-Dependencies = dict()
+from mem import mem
 
 
 def announce(msg, ignore_quiet=False):
-    if Mode['noisy'] == 'noisy' or ignore_quiet:
+    if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
         print "\n>>> " + msg + "\n"
 
+
 def mention(msg, ignore_quiet=False):
-    if Mode['noisy'] == 'noisy' or ignore_quiet:
+    if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
         print ">> " + msg
 
+
 def note(msg, ignore_quiet=False):
-    if Mode['noisy'] == 'noisy' or ignore_quiet:
+    if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
         print "> " + msg
 
 
-
-
-
 def find_bridge_ip():
-    command = ["ip", "addr", "show", "dev", "docker0"]
-    sp = subprocess.Popen((command), stdout=subprocess.PIPE)
+    done = False
+    try:
+        command = ["ip", "addr", "show", "dev", "docker0"]
+        sp = subprocess.Popen(command, stdout=subprocess.PIPE)
 
-    output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split()[1].split('/')[0]
+        output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split()[1].split('/')[0]
+
+        done = True
+
+    except OSError as e:
+        if e.errno == os.errno.ENOENT:
+            # handle file not found error.
+            done = False
+        else:
+            # Something else went wrong
+            raise
+
+    if not done:
+        try:
+            command = ["ifconfig", "docker0"]
+
+            sp = subprocess.Popen(command, stdout=subprocess.PIPE)
+
+            output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split(':')[1].split()[0]
+
+        except OSError as e:
+            if e.errno == os.errno.ENOENT:
+                # handle file not found error.
+                done = False
+            else:
+                raise
+
+    if not done:
+        raise Exception("Could not find either 'ip' or 'ifconfig' in PATH")
 
     sp.wait()
 
     # ensure we have a valid ip
     p = re.compile(
-        '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
+            '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
     if not p.match(output):
         raise Exception(output + " is not a valid IP address for BridgeIP")
 
     return output
 
-BridgeIp = find_bridge_ip()
 
-
+mem.BridgeIp = find_bridge_ip()
 
 
 # http://stackoverflow.com/a/11564323
@@ -97,13 +97,12 @@ def topological_sort(source):
         emitted = next_emitted
 
 
-
-
 def inspect_container(container, go_template):
-    command = ['docker', 'inspect', '-f', (" ").join(go_template), get_container(container)]
+    command = ['docker', 'inspect', '-f', " ".join(go_template), get_container(container)]
 
-    #1  note(" ".join(command))
+    # 1  note(" ".join(command))
     return subprocess.check_output(command, stderr=subprocess.STDOUT).strip()
+
 
 def tpl_lookup(template):
     words = template.split()
@@ -118,7 +117,7 @@ def tpl_lookup(template):
         varname = words.pop(0)
 
         # strip the first pipe character if found
-        if("|" in words):
+        if ("|" in words):
             words.remove('|')
 
         # use remaining words if any as default if the varname not found in the environment
@@ -130,7 +129,6 @@ def tpl_lookup(template):
 
         return value
 
-
     if selecta == "INSPECT":
         container = words[0]
         words.pop(0)
@@ -140,10 +138,9 @@ def tpl_lookup(template):
         key = words[0]
         words.pop(0)
         if key == 'BRIDGE_IP':
-            return BridgeIp
+            return mem.BridgeIp
         if key == "PROJECT":
-            return Project
-
+            return mem.Project
 
 
 def parse_template(tpl):
@@ -159,7 +156,6 @@ def parse_template(tpl):
             else:
                 out += tpl_lookup(a2[j].strip())
 
-
     return out
 
 
@@ -171,30 +167,30 @@ def get_value(dict, key):
 
 def calc_deps(container, config):
     for key in config[container]:
-        if not Dependencies.has_key(container):
-            Dependencies[container] = []
+        if not mem.Dependencies.has_key(container):
+            mem.Dependencies[container] = []
         val = config[container][key]
         if key == "before":
             for before in val:
-                if before not in Dependencies:
-                    Dependencies[before] = [container]
+                if before not in mem.Dependencies:
+                    mem.Dependencies[before] = [container]
                 else:
-                    Dependencies[before].append(container)
+                    mem.Dependencies[before].append(container)
 
         if key == "after":
-            if container not in Dependencies:
-                Dependencies[container] = val
+            if container not in mem.Dependencies:
+                mem.Dependencies[container] = val
             else:
                 for after in val:
-                    if after not in Dependencies[container]:
-                        Dependencies[container].append(after)
+                    if after not in mem.Dependencies[container]:
+                        mem.Dependencies[container].append(after)
 
 
 def fill_container(container, config):
-    announce("Filling "  + container + " container")
+    announce("Filling " + container + " container")
     if config.has_key('build'):
         build = get_value(config, 'build')
-        tag = Project + "/" + build
+        tag = mem.Project + "/" + build
 
         if config.has_key('tag'):
             tag = get_value(config, 'tag')
@@ -203,7 +199,7 @@ def fill_container(container, config):
         if build[:4] == 'git:':
             if not config.has_key('tag'):
                 raise Exception("If you are using a git repo for 'build' you must also specify 'tag'")
-            tag = get_value(config,'tag')
+            tag = get_value(config, 'tag')
 
             url = build[4:]
             print "Cloning " + tag + " from " + url
@@ -213,18 +209,18 @@ def fill_container(container, config):
                 shutil.rmtree(dir)
 
             command = ['git', 'clone', url, dir]
-            note (" ".join(command))
+            note(" ".join(command))
             call(command)
             target = dir
 
         mention("building " + container + " ( " + target + " ) " + " with tag '" + tag + "'")
         command = ['docker', 'build', '-t', tag, target]
-        note (" ".join(command))
+        note(" ".join(command))
         call(command)
     else:
         mention(container + " uses an image. Pulling " + get_value(config, 'image'))
         command = ['docker', 'pull', get_value(config, 'image')]
-        note (" ".join(command))
+        note(" ".join(command))
         call(command)
 
 
@@ -238,11 +234,13 @@ def wait_for_up(container, config):
         logmsg = get_value(upwhen, 'logmsg')
 
         if upwhen.has_key('logfile'):
-            logfile = G.get('volumePath') + "/" + Project + "/" + container + "/" + get_value(upwhen, 'logfile')
-            mention("Waiting up to " + str(timeout) + " seconds for '" + logmsg + "' in '" + logfile + "' to indicate that " + container + " is stacked")
+            logfile = mem.VolumePath + "/" + mem.Project + "/" + container + "/" + get_value(upwhen, 'logfile')
+            mention("Waiting up to " + str(
+                timeout) + " seconds for '" + logmsg + "' in '" + logfile + "' to indicate that " + container + " is stacked")
 
         else:
-            mention("Waiting up to " + str(timeout) + " seconds for '" + logmsg + "' to indicate that " + container + " is stacked")
+            mention("Waiting up to " + str(
+                timeout) + " seconds for '" + logmsg + "' to indicate that " + container + " is stacked")
 
         waited = 0
         ok = False
@@ -259,14 +257,13 @@ def wait_for_up(container, config):
                     if os._exists(logfile):
                         command = ["tail", logfile]
 
-
             # command may not have been set yet if the file didn't exist
             if 'command' in locals():
                 try:
                     output = subprocess.check_output(command, stderr=subprocess.STDOUT)
                 except:
                     pass
-            #print output
+            # print output
 
             if 'output' in locals() and output.find(logmsg) > -1:
                 ok = True
@@ -283,24 +280,25 @@ def wait_for_up(container, config):
         time.sleep(int(upwhen['sleep']))
 
 
-
 def get_image(config):
     if config.has_key('image'):
         image = get_value(config, 'image')  # .split(':')[0]
     elif config.has_key('tag'):
         image = get_value(config, 'tag')
     else:
-        image = Project + '/' + get_value(config, 'build')
+        image = mem.Project + '/' + get_value(config, 'build')
 
     return image
 
+
 def get_container(name):
-    return Project + "_" + name
+    return mem.Project + "_" + name
+
 
 def stack_container(container, config):
     announce("Stacking " + container + " container")
     if config.has_key('run') and not config['run']:
-        note ("container has 'run' key set to " + str(config['run']) + ", skipping")
+        note("container has 'run' key set to " + str(config['run']) + ", skipping")
         return
 
     command = ['docker', 'run', '-d', '--name', get_container(container)]
@@ -311,7 +309,7 @@ def stack_container(container, config):
 
     if config.has_key('hostname'):
         command = command + ['--hostname', get_value(config, 'hostname')]
-    #else:
+    # else:
     #    command = command + ['--hostname', container]
 
     if config.has_key('dns'):
@@ -319,11 +317,11 @@ def stack_container(container, config):
 
     if config.has_key('volumes'):
         for volumespec in config['volumes']:
-            volumespec_parsed =  parse_template(volumespec)
+            volumespec_parsed = parse_template(volumespec)
             if volumespec_parsed.startswith("/"):
                 command = command + ['-v', volumespec_parsed]
             else:
-                command = command + ['-v', G.get('volumePath') + "/" + Project + "/" + container + "/" + volumespec_parsed]
+                command = command + ['-v', mem.VolumePath + "/" + mem.Project + "/" + container + "/" + volumespec_parsed]
 
     if config.has_key('ports'):
         for portspec in config['ports']:
@@ -352,11 +350,11 @@ def stack_container(container, config):
 def unstack_container(container):
     announce("Unstacking " + container + " container")
     command = ['docker', 'stop', get_container(container)]
-    note (" ".join(command))
+    note(" ".join(command))
     call(command)
 
     command = ['docker', 'rm', '--force', get_container(container)]
-    note (" ".join(command))
+    note(" ".join(command))
     call(command)
 
 
@@ -372,8 +370,9 @@ def container_status(container):
     except subprocess.CalledProcessError:
         output = "_ unstacked _"
 
-    ignore_quiet=True
+    ignore_quiet = True
     mention(container + ": " + output, ignore_quiet),
+
 
 def empty_container(container, config):
     announce("Emptying image " + container)
@@ -384,7 +383,7 @@ def empty_container(container, config):
 
 def enter_container(commands):
     which = commands.popleft()
-    run=["/bin/bash"]
+    run = ["/bin/bash"]
     if len(commands) > 0:
         run = list(commands)
     announce("Entering '" + which + "' container and running: " + str(run))
@@ -394,15 +393,15 @@ def enter_container(commands):
 
 
 def edit_yaml():
-    announce("Editing " + yamlpath)
-    command = [os.environ['EDITOR'], yamlpath + '/grua.yaml']
+    announce("Editing " + mem.yamlpath)
+    command = [os.environ['EDITOR'], mem.yamlpath + '/grua.yaml']
     note(" ".join(command))
     call(command)
 
 
 def edit_dockerfile(container):
     announce("Editing dockerfile for " + container)
-    command = [os.environ['EDITOR'], yamlpath + '/' + container + "/Dockerfile"]
+    command = [os.environ['EDITOR'], mem.yamlpath + '/' + container + "/Dockerfile"]
     note(" ".join(command))
     call(command)
 
@@ -410,6 +409,7 @@ def edit_dockerfile(container):
 def print_mode():
     Mode = get_mode()
     print Mode['noisy'] + ", " + Mode['destructive']
+
 
 def process_command(command_list):
     Mode = get_mode()
@@ -419,30 +419,30 @@ def process_command(command_list):
     command = commands.popleft()
 
     if len(commands) > 0:
-        #which = [commands.popleft()]
+        # which = [commands.popleft()]
         # exclude here commands which cannot take multiple container names but instead take further args
         if command != "enter":
             which = commands
     else:
-        deps = sorted_run_deps
+        deps = mem.sorted_run_deps
         deps.remove('global')
         which = deps
 
     if command == 'fill':
         for container in which:
-            fill_container(container, config[container])
+            fill_container(container, mem.config[container])
 
     elif command == 'stack':
         for container in which:
-            if config[container].has_key('run') and not config[container]['run']:
+            if mem.config[container].has_key('run') and not mem.config[container]['run']:
                 pass
             else:
-                stack_container(container, config[container])
+                stack_container(container, mem.config[container])
 
     elif command == 'unstack':
         for container in reversed(which):
 
-            if config[container].has_key('run') and not config[container]['run']:
+            if mem.config[container].has_key('run') and not mem.config[container]['run']:
                 pass
             else:
                 unstack_container(container)
@@ -450,15 +450,15 @@ def process_command(command_list):
     elif command == 'restack':
         for container in which:
 
-            if config[container].has_key('run') and not config[container]['run']:
+            if mem.config[container].has_key('run') and not mem.config[container]['run']:
                 pass
             else:
                 unstack_container(container)
-                stack_container(container, config[container])
+                stack_container(container, mem.config[container])
 
     elif command == "status":
         for container in which:
-            if config[container].has_key('run') and not config[container]['run']:
+            if mem.config[container].has_key('run') and not mem.config[container]['run']:
                 pass
             else:
                 container_status(container)
@@ -469,48 +469,48 @@ def process_command(command_list):
     elif command == "empty":
         for container in reversed(which):
             unstack_container(container)
-            empty_container(container, config[container])
+            empty_container(container, mem.config[container])
 
     elif command == "refill":
         for container in which:
             unstack_container(container)
-        if Mode['destructive']=='destructive':
-            empty_container(container, config[container])
-        fill_container(container, config[container])
-            
+        if Mode['destructive'] == 'destructive':
+            empty_container(container, mem.config[container])
+        fill_container(container, mem.config[container])
+
     elif command == "enter":
-        #if len(which) > 1:
+        # if len(which) > 1:
         #    raise(Exception("You may only enter one container at a time. Please provide container name"))
 
         enter_container(commands)
 
     elif command == "refstk":
         if len(which) > 1:
-            raise(Exception("You may only refstk one container at a time. Please provide container name"))
+            raise (Exception("You may only refstk one container at a time. Please provide container name"))
 
         container = which[0]
 
         unstack_container(container)
-        if Mode['destructive']=='destructive':
-            empty_container(container, config[container])
-        fill_container(container, config[container])
-        stack_container(container, config[container])
+        if Mode['destructive'] == 'destructive':
+            empty_container(container, mem.config[container])
+        fill_container(container, mem.config[container])
+        stack_container(container, mem.config[container])
 
     elif command == "edit":
         edit_yaml()
 
     elif command == "editd":
         for container in which:
-            if config[container].has_key('build'):
+            if mem.config[container].has_key('build'):
                 edit_dockerfile(container)
 
     elif command == "mode":
-        MODE_USAGE="Mode can either be 'noisy', 'quiet', 'destructive', 'conservative'"
+        MODE_USAGE = "Mode can either be 'noisy', 'quiet', 'destructive', 'conservative'"
         if len(command_list) == 1:
             print_mode()
             return
         mode = command_list[1]
-        config_path = ConfigPath + "/" + Project
+        config_path = mem.ConfigPath + "/" + mem.Project
 
         quietFile = config_path + "/quiet"
         noisyFile = config_path + "/noisy"
@@ -548,15 +548,16 @@ def touch(fname, times=None):
     with open(fname, 'a'):
         os.utime(fname, times)
 
+
 def sort_containers():
     tups = list()
-    for dep in Dependencies.keys():
-        tups.append((dep, Dependencies[dep]))
+    for dep in mem.Dependencies.keys():
+        tups.append((dep, mem.Dependencies[dep]))
 
     s = topological_sort(tups)
 
     sorted = list();
-    for dummy in Dependencies:
+    for dummy in mem.Dependencies:
         sorted.append(s.next())
     return sorted
 
@@ -570,15 +571,16 @@ def find_yaml_location():
 
     raise (IOError("grua.yaml file not found"))
 
-def get_mode():
-    noisy='noisy'
-    destructive='destructive'
-    if os.path.isfile(ConfigPath + "/" + Project + "/quiet"):
-        noisy='quiet'
-    if os.path.isfile(ConfigPath + "/" + Project + "/conservative"):
-        destructive='conservative'
 
-    return { "noisy": noisy, "destructive": destructive}
+def get_mode():
+    noisy = 'noisy'
+    destructive = 'destructive'
+    if os.path.isfile(mem.ConfigPath + "/" + mem.Project + "/quiet"):
+        noisy = 'quiet'
+    if os.path.isfile(mem.ConfigPath + "/" + mem.Project + "/conservative"):
+        destructive = 'conservative'
+
+    return {"noisy": noisy, "destructive": destructive}
 
 
 def usage():
@@ -602,10 +604,6 @@ def usage():
     print "   grua editd\t\tEdit Dockerfile(s) from within subfolder"
     print
     print "   grua mode\t\tSet operating mode"
-    print 
-    print "> grua mode is currently: " + Mode['noisy'] + ", " + Mode['destructive'] 
-    print 
-
-
-
-
+    print
+    print "> grua mode is currently: " + Mode['noisy'] + ", " + Mode['destructive']
+    print

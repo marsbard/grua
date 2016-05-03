@@ -28,7 +28,8 @@ are any stable releases (hint, there aren't, yet).
 
 `$ ./install`
 
-If you get an error about "No module named yaml", please run `pip install pyyaml`.
+If you get an error about "No module named yaml", please run `sudo pip install pyyaml`. You might need to
+install `pip` first, on Ubuntu you can do `sudo apt-get install python-pip`
 
 ## Why another composition tool?
 
