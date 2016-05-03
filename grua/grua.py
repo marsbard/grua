@@ -1,97 +1,33 @@
 #!/usr/bin/env python
-import shutil, os.path, time, subprocess, shlex, re
 from collections import deque
-from subprocess import call
 from mem import mem
-
-
-def announce(msg, ignore_quiet=False):
-    if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
-        print "\n>>> " + msg + "\n"
-
-
-def mention(msg, ignore_quiet=False):
-    if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
-        print ">> " + msg
-
-
-def note(msg, ignore_quiet=False):
-    if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
-        print "> " + msg
-
-
-def find_bridge_ip():
-    done = False
-    try:
-        command = ["ip", "addr", "show", "dev", "docker0"]
-        sp = subprocess.Popen(command, stdout=subprocess.PIPE)
-
-        output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split()[1].split('/')[0]
-
-        done = True
-
-    except OSError as e:
-        if e.errno == os.errno.ENOENT:
-            # handle file not found error.
-            done = False
-        else:
-            # Something else went wrong
-            raise
-
-    if not done:
-        try:
-            command = ["ifconfig", "docker0"]
-
-            sp = subprocess.Popen(command, stdout=subprocess.PIPE)
-
-            output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split(':')[1].split()[0]
-
-        except OSError as e:
-            if e.errno == os.errno.ENOENT:
-                # handle file not found error.
-                done = False
-            else:
-                raise
-
-    if not done:
-        raise Exception("Could not find either 'ip' or 'ifconfig' in PATH")
-
-    sp.wait()
-
-    # ensure we have a valid ip
-    p = re.compile(
-            '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
-    if not p.match(output):
-        raise Exception(output + " is not a valid IP address for BridgeIP")
-
-    return output
-
+from util import find_bridge_ip, touch
+from docker import *
 
 mem.BridgeIp = find_bridge_ip()
+mem.Project = 'grua'  # gets replaced by 'project' value in 'global' from grua.yaml
+mem.GruaBase = '/var/lib/grua'
+mem.VolumePath = mem.GruaBase + '/volumes'  # replaced by 'global/volumepath' in grua.yaml
+mem.ConfigPath = os.environ["HOME"] + "/.grua"
 
+mem.yaml_path = "."
+mem.config = {}
+mem.sorted_run_deps = []
 
-
-
-
-
-
-
-
-
-
-
+mem.UnstackTimeout = 15
+mem.Dependencies = dict()
 
 
 def edit_yaml():
-    announce("Editing " + mem.yamlpath)
-    command = [os.environ['EDITOR'], mem.yamlpath + '/grua.yaml']
+    announce("Editing " + mem.yaml_path)
+    command = [os.environ['EDITOR'], mem.yaml_path + '/grua.yaml']
     note(" ".join(command))
     call(command)
 
 
 def edit_dockerfile(container):
     announce("Editing dockerfile for " + container)
-    command = [os.environ['EDITOR'], mem.yamlpath + '/' + container + "/Dockerfile"]
+    command = [os.environ['EDITOR'], mem.yaml_path + '/' + container + "/Dockerfile"]
     note(" ".join(command))
     call(command)
 
@@ -99,6 +35,55 @@ def edit_dockerfile(container):
 def print_mode():
     Mode = get_mode()
     print Mode['noisy'] + ", " + Mode['destructive']
+
+
+
+
+def find_yaml_location():
+    pathname = os.path.curdir
+    while pathname != '/':
+        if os.path.isfile(pathname + '/grua.yaml'):
+            return pathname
+        pathname = os.path.abspath(os.path.join(pathname, os.pardir))
+
+    raise (IOError("grua.yaml file not found"))
+
+
+def get_mode():
+    noisy = 'noisy'
+    destructive = 'destructive'
+    if os.path.isfile(mem.ConfigPath + "/" + mem.Project + "/quiet"):
+        noisy = 'quiet'
+    if os.path.isfile(mem.ConfigPath + "/" + mem.Project + "/conservative"):
+        destructive = 'conservative'
+
+    return {"noisy": noisy, "destructive": destructive}
+
+
+def usage():
+    Mode = get_mode()
+    print "                grua\n                ----"
+    print "              //\\  ___"
+    print "              Y  \\/_/=|"
+    print "             _L  ((|_L_|"
+    print "            (/\)(__(____) cjr\n"
+    print "   grua fill\t\tBuild requisite containers"
+    print "   grua empty\t\tDestroy all the related images"
+    print "   grua refill\t\tEmpty followed by fill - rebuild image(s)"
+    print
+    print "   grua stack\t\tRun container composition"
+    print "   grua unstack\t\tStop and remove container composition"
+    print "   grua restack\t\tUnstack and restack container composition"
+    print
+    print "   grua enter\t\tEnter container, run bash or opt args"
+    print "   grua status\t\tShow status of containers"
+    print "   grua edit\t\tEdit grua.yaml from within subfolder"
+    print "   grua editd\t\tEdit Dockerfile(s) from within subfolder"
+    print
+    print "   grua mode\t\tSet operating mode"
+    print
+    print "> grua mode is currently: " + Mode['noisy'] + ", " + Mode['destructive']
+    print
 
 
 def process_command(command_list):
@@ -232,57 +217,3 @@ def process_command(command_list):
 
     else:
         raise Exception("Unknown command '" + command + "'")
-
-
-def touch(fname, times=None):
-    with open(fname, 'a'):
-        os.utime(fname, times)
-
-
-
-
-def find_yaml_location():
-    pathname = os.path.curdir
-    while pathname != '/':
-        if os.path.isfile(pathname + '/grua.yaml'):
-            return pathname
-        pathname = os.path.abspath(os.path.join(pathname, os.pardir))
-
-    raise (IOError("grua.yaml file not found"))
-
-
-def get_mode():
-    noisy = 'noisy'
-    destructive = 'destructive'
-    if os.path.isfile(mem.ConfigPath + "/" + mem.Project + "/quiet"):
-        noisy = 'quiet'
-    if os.path.isfile(mem.ConfigPath + "/" + mem.Project + "/conservative"):
-        destructive = 'conservative'
-
-    return {"noisy": noisy, "destructive": destructive}
-
-
-def usage():
-    Mode = get_mode()
-    print "                grua\n                ----"
-    print "              //\\  ___"
-    print "              Y  \\/_/=|"
-    print "             _L  ((|_L_|"
-    print "            (/\)(__(____) cjr\n"
-    print "   grua fill\t\tBuild requisite containers"
-    print "   grua empty\t\tDestroy all the related images"
-    print "   grua refill\t\tEmpty followed by fill - rebuild image(s)"
-    print
-    print "   grua stack\t\tRun container composition"
-    print "   grua unstack\t\tStop and remove container composition"
-    print "   grua restack\t\tUnstack and restack container composition"
-    print
-    print "   grua enter\t\tEnter container, run bash or opt args"
-    print "   grua status\t\tShow status of containers"
-    print "   grua edit\t\tEdit grua.yaml from within subfolder"
-    print "   grua editd\t\tEdit Dockerfile(s) from within subfolder"
-    print
-    print "   grua mode\t\tSet operating mode"
-    print
-    print "> grua mode is currently: " + Mode['noisy'] + ", " + Mode['destructive']
-    print
