@@ -2,23 +2,13 @@
 
 cd "`dirname $0`"
 
-#grua mode noisy
-grua mode quiet
-
-grua fill
-
 export GRUA_TEST_ENV="asd123poi" 
 export GRUA_TEST_DEFAULT2="Overridden"
 
-grua stack
+echo ">> Have to restack this one to get it to take the environment..."
+grua -:q restack
 
-sleep 1
-
-grua mode quiet
-CHECK=`grua enter envtest sh -c "echo \$GRUA_TEST_ENV"| sed "s/\r//g"`
-#grua mode noisy
-
-sleep 1
+CHECK=`grua -:q enter envtest sh -c "echo \$GRUA_TEST_ENV"| sed "s/\r//g"`
 
 echo ">> Checking passing environment to container"
 if [ "$CHECK" = "$GRUA_TEST_ENV" ]
@@ -31,9 +21,8 @@ else
 fi
 
 echo ">> Checking default value"
-CHECK2=$(grua enter envtest sh -c "echo \$GRUA_TEST_DEFAULT" | sed "s/\r//g")
+CHECK2=$(grua -:q enter envtest sh -c "echo \$GRUA_TEST_DEFAULT" | sed "s/\r//g")
 
-sleep 1
 if [ "$CHECK2" = "This is the default value" ]
 then
 	echo "[OK] env test passed: $CHECK2"
@@ -44,9 +33,9 @@ else
 fi
 
 echo ">> Checking default value override"
-CHECK2=$(grua enter envtest sh -c "echo \$GRUA_TEST_DEFAULT2" | sed "s/\r//g")
+CHECK2=$(grua -:q enter envtest sh -c "echo \$GRUA_TEST_DEFAULT2" | sed "s/\r//g")
+echo override check: $CHECK2
 
-sleep 1
 if [ "$CHECK2" = "Overridden" ]
 then
 	echo "[OK] env test passed: $CHECK2"
@@ -56,9 +45,4 @@ else
 	RESULT=99
 fi
 
-grua unstack
-sleep 1
-
-
-grua mode noisy
 exit $RESULT

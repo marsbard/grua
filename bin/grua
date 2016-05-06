@@ -16,8 +16,8 @@ args2 = args
 args = []
 mem.quiet = False
 for arg in args2:
-    if arg.startswith("-"):
-        if arg == "-q":
+    if arg.startswith("-:"):
+        if arg == "-:q":
             mem.quiet = True
         else:
             raise AssertionError("Unrecognised argument " + arg)

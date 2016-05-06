@@ -3,11 +3,6 @@
 cd "`dirname $0`"
 
 
-grua mode quiet
-grua fill -q
-
-grua stack -q
-
 OUT=`docker logs gruatests_upwhen`
 
 # search for "Timed out"
@@ -35,8 +30,6 @@ else
 	RESULT=99
 fi
 
-
-grua unstack -q
 
 exit $RESULT
 
