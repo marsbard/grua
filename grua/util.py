@@ -1,4 +1,5 @@
 import subprocess
+from subprocess import call
 import os
 import re
 from mem import mem
@@ -6,17 +7,29 @@ from mem import mem
 
 def announce(msg, ignore_quiet=False):
     if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
-        print "\n>>> " + msg + "\n"
+        if not mem.quiet:
+            print "\n>>> " + msg + "\n"
 
 
 def mention(msg, ignore_quiet=False):
     if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
-        print ">> " + msg
+        if not mem.quiet:
+            print ">> " + msg
 
 
 def note(msg, ignore_quiet=False):
     if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
-        print "> " + msg
+        if not mem.quiet:
+            print "> " + msg
+
+
+def quietcall(command):
+    if mem.quiet:
+        nullhandle = open(os.devnull, 'w')
+        call(command, stdout=nullhandle)
+        nullhandle.close()
+    else:
+        call(command)
 
 
 def find_bridge_ip():

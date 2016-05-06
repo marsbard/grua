@@ -1,7 +1,7 @@
 import subprocess, os, shutil, time, shlex
 from subprocess import call
 from mem import mem
-from util import announce, mention, note
+from util import announce, mention, note, quietcall
 from templater import get_value, parse_template
 
 
@@ -48,21 +48,25 @@ def fill_container(container, config):
             target = dir
 
         mention("building " + container + " ( " + target + " ) " + " with tag '" + tag + "'")
+
         command = ['docker', 'build', '-t', tag, target]
+
         note(" ".join(command))
-        call(command)
+
+        quietcall(command)
+
     else:
         mention(container + " uses an image. Pulling " + get_value(config, 'image'))
         command = ['docker', 'pull', get_value(config, 'image')]
         note(" ".join(command))
-        call(command)
+        quietcall(command)
 
 
 def empty_container(container, config):
     announce("Emptying image " + container)
     command = ['docker', 'rmi', get_image(config)]
     note(" ".join(command))
-    call(command)
+    quietcall(command)
 
 
 def stack_container(container, config):
@@ -111,7 +115,7 @@ def stack_container(container, config):
         command = command + shlex.split(get_value(config, 'command'))
 
     note(" ".join(command))
-    call(command)
+    quietcall(command)
 
     if config.has_key('upwhen'):
         wait_for_up(container, config)
@@ -121,11 +125,11 @@ def unstack_container(container):
     announce("Unstacking " + container + " container")
     command = ['docker', 'stop', get_container(container)]
     note(" ".join(command))
-    call(command)
+    quietcall(command)
 
     command = ['docker', 'rm', '--force', get_container(container)]
     note(" ".join(command))
-    call(command)
+    quietcall(command)
 
 
 def inspect_container(container, go_template):

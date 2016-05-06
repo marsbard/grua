@@ -12,6 +12,19 @@ args = sys.argv[1:]
 
 mem.yaml_path = grua.find_yaml_location()
 
+args2 = args
+args = []
+mem.quiet = False
+for arg in args2:
+    if arg.startswith("-"):
+        if arg == "-q":
+            mem.quiet = True
+        else:
+            raise AssertionError("Unrecognised argument " + arg)
+    else:
+        args.append(arg)
+
+
 os.chdir(mem.yaml_path)
 
 with open(mem.yaml_path + "/grua.yaml", 'r') as stream:
