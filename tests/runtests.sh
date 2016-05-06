@@ -10,8 +10,11 @@ function pass {
   echo -e "[runtests] \033[32m" $* "\033[39m"
 }
 
+
+FAILS=()
 function fail {
   echo -e "[runtests] \033[31m" $* "\033[39m"
+	FAILS+=("$*")
 }
 
 function descr {
@@ -69,10 +72,22 @@ do
 	then
 		pass "Test [$e] passed"
 	else
-		fail "Test [$e] FAILed"
+		fail "Test [$e] failed"
 		#exit 1
 	fi
  
 	echo
 
 done
+
+if [ ${#FAILS[@]} -gt 0 ]
+then
+	echo "There were failures: "
+	for fail in ${!FAILS[@]}
+  do
+		echo -e "[runtests] \033[31m" ${FAILS[$fail]}  "\033[39m"
+	done
+	exit 99
+fi
+
+exit 0

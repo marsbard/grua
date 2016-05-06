@@ -1,0 +1,5 @@
+Each container emits its ID and current time
+
+We use upwhen to sleep between container starts
+
+container 1 should have later time than container 2

@@ -1,0 +1,14 @@
+global:
+  project: gruatests
+after1:
+  image: busybox
+  command: "date +%s"
+  upwhen: 
+    sleep: 2
+  after:
+    - after2
+after2:
+  image: busybox
+  command: "date +%s"
+  upwhen: 
+    sleep: 2
