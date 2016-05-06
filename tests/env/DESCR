@@ -1,0 +1,3 @@
+1) Check that an environment variable is passed OK
+2) Check that an undefined variable returns its default
+3) Check that a defined variable does not return its default

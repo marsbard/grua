@@ -1,0 +1,2 @@
+1) Check that we get stacked without timing out without our msg
+2) Check the content of the upwhen message was found after stacking

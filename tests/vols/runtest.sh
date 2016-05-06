@@ -5,11 +5,10 @@ cd "`dirname $0`"
 
 GRUA_TEST="foo0301qc[p"
 
-grua enter voltest sh -c "echo $GRUA_TEST > /data/testfile"
+grua -:q enter voltest sh -c "echo $GRUA_TEST > /data/testfile"
 
 CHECK=`cat /var/lib/grua/volumes/gruatests/voltest/data/testfile`
 
-grua enter voltest sh -c "rm /data/testfile"
 
 
 if [ "$CHECK" = "$GRUA_TEST" ]
@@ -21,7 +20,6 @@ else
 	RESULT=99
 fi
 
-
-
+grua -:q enter voltest sh -c "rm /data/testfile"
 
 exit $RESULT

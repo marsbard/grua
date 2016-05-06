@@ -14,6 +14,14 @@ function fail {
   echo -e "[runtests] \033[31m" $* "\033[39m"
 }
 
+function descr {
+  echo -e "\033[33m"
+	echo ----------------------------------
+	cat $1
+	echo ----------------------------------
+  echo -e "\033[39m"
+}
+
 if [ "$1" != "" ]
 then
   for x in $*
@@ -36,7 +44,7 @@ do
 	announce "Running test in '$e'"
 	if [ -f $e/DESCR ]
 	then
-		cat $e/DESCR
+		descr $e/DESCR
 	fi
 	
 	cd $d
