@@ -88,6 +88,8 @@ then
 		echo -e "[runtests] \033[31m" ${FAILS[$fail]}  "\033[39m"
 	done
 	exit 99
+else 
+	echo "All tests passed"
 fi
 
 exit 0
