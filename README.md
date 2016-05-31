@@ -1,9 +1,9 @@
 # grua
 An opinionated declarative docker composition tool with runtime dependencies between containers.
 
-![](https://openclipart.org/image/200px/svg_to_png/176279/shipbuilding-crane-1.png)
+![ ](https://raw.githubusercontent.com/marsbard/grua/new-crane-image/assets/port_400.png)
 
-*https://openclipart.org/detail/176279/shipbuilding-crane*
+*https://openclipart.org/detail/218695/port*
 
 
 * __[Installation](#installation)__
