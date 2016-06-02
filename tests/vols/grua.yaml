@@ -4,4 +4,6 @@ voltest:
   image: busybox
   volumes:
     - data:/data
+    - ./local:/local
+    - /tmp:/abs
   command: "sleep 20"
