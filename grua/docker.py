@@ -94,8 +94,14 @@ def stack_container(container, config):
             volumespec_parsed = parse_template(volumespec)
             if volumespec_parsed.startswith("/"):
                 command = command + ['-v', volumespec_parsed]
+            elif volumespec_parsed.startswith('./'):
+                # docker complains if path starts with "." so expand CWD here
+                cwd = os.path.dirname(os.path.realpath(volumespec_parsed.split(':')[0]))
+                realpath = cwd + '/' + volumespec_parsed.strip('./')
+                command = command + ['-v', realpath]
             else:
-                command = command + ['-v', mem.VolumePath + "/" + mem.Project + "/" + container + "/" + volumespec_parsed]
+                command = command + ['-v', mem.VolumePath + '/' + mem.Project +
+                                     '/' + container + '/' + volumespec_parsed]
 
     if config.has_key('ports'):
         for portspec in config['ports']:
@@ -178,11 +184,11 @@ def wait_for_up(container, config):
         if upwhen.has_key('logfile'):
             logfile = mem.VolumePath + "/" + mem.Project + "/" + container + "/" + get_value(upwhen, 'logfile')
             mention("Waiting up to " + str(
-                timeout) + " seconds for '" + logmsg + "' in '" + logfile + "' to indicate that " + container + " is stacked")
+                    timeout) + " seconds for '" + logmsg + "' in '" + logfile + "' to indicate that " + container + " is stacked")
 
         else:
             mention("Waiting up to " + str(
-                timeout) + " seconds for '" + logmsg + "' to indicate that " + container + " is stacked")
+                    timeout) + " seconds for '" + logmsg + "' to indicate that " + container + " is stacked")
 
         waited = 0
         ok = False
@@ -220,4 +226,3 @@ def wait_for_up(container, config):
     if upwhen.has_key('sleep'):
         mention("Sleeping " + str(upwhen['sleep']) + " extra seconds as configured")
         time.sleep(int(upwhen['sleep']))
-

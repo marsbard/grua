@@ -1,4 +1,9 @@
 Writes a file to the filesystem inside the container, then 
-checks the content of that file from the host filesystem
+checks the content of that file from the host filesystem.
 
-Deletes the file (but cannot remove the volume folder) after the test
+Checks:
+
+  * Volume located in grua default
+  * Volume in local folder (./local)
+  * Volume in absolute location on host (/tmp)
+

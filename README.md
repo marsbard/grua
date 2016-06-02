@@ -15,7 +15,9 @@ An opinionated declarative docker composition tool with runtime dependencies bet
 * __[Grua templating](#grua-templating)__
 * __[Grua command line](#grua-command-line)__
 
+## What's new
 
+* 2016-06-02 Added support for volumes local to directory containing `grua.yaml`
 
 ## Installation
 
@@ -322,11 +324,15 @@ Equivalent to `docker run --dns <address>`
 
 These work slightly differently to how docker volumes are specified normally. As usual there is a 
 host location for the volume, and a location within the container, specified like 
-`<host location>:<container location>`. But when `host location` does __not__ start with a `/` 
+`<host location>:<container location>`. But when `host location` does __not__ start with a `/` or `.`
 character, the location of the volume on the host will be relative to [volumepath](#global-volumepath)
 and it will include the global [project](#global-project) attribute in its path.
 
 When `host location` __does__ start with `/`, the location of the volume on the host will be absolute.
+
+When `host location` starts with a `.`, (incidentally not allowed by docker) the location of the 
+volume is relative to the directory where grua.yaml is (although navigating up the directory tree 
+with `..` is specifically excluded)
 
 For example: 
 ```
@@ -336,10 +342,12 @@ alfresco:
   volumes:
     - repo/data:/data
     - /tmp:/tmp
+    - ./local:/local
 ```
 In the above example, if [volumepath](#global-volumepath) is set to its default value, the first volume, 
 `/data` in the container, will be located at  `/var/lib/grua/volumes/alf/repo/data` on the host, while 
-the second volume, `/tmp` in the container will be mapped to the `/tmp` directory of the host.
+the second volume, `/tmp` in the container will be mapped to the `/tmp` directory of the host, and the
+third is mapped to a folder `local` in the same location as `grua.yaml`.
 
 
 * <a name="attrs-stack-ports">__ports__ (list)</a>
