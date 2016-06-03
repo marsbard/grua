@@ -2,6 +2,7 @@ import subprocess
 from subprocess import call
 import os
 import re
+import sys
 from mem import mem
 
 
@@ -21,6 +22,11 @@ def note(msg, ignore_quiet=False):
     if mem.Mode['noisy'] == 'noisy' or ignore_quiet:
         if not mem.quiet:
             print "> " + msg
+
+
+def warn(msg):
+    if not mem.quiet:
+        sys.stderr.write( ">> " + msg)
 
 
 def quietcall(command):
@@ -46,9 +52,9 @@ def find_bridge_ip():
         done = True
 
     except OSError as e:
-        print ("WARN: OSError Could not use 'ip addr | grep inet' to find bridge ip " + e.message)
+        warn ("WARN: OSError Could not use 'ip addr | grep inet' to find bridge ip " + e.message)
     except subprocess.CalledProcessError as e:
-        print ("WARN: CalledProcessError Could not use 'ip addr | grep inet' to find bridge ip " + e.message)
+        warn ("WARN: CalledProcessError Could not use 'ip addr | grep inet' to find bridge ip " + e.message)
 
     if not done:
         try:
@@ -59,14 +65,14 @@ def find_bridge_ip():
             output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split(':')[1].split()[0]
 
         except OSError as e:
-            print("WARN: OSError Could not use 'ifconfig to find bridge ip " + e.message)
+            warn("WARN: OSError Could not use 'ifconfig to find bridge ip " + e.message)
         except subprocess.CalledProcessError as e:
-            print("WARN: CalledProcessError Could not use 'ifconfig to find bridge ip " + e.message)
+            warn("WARN: CalledProcessError Could not use 'ifconfig to find bridge ip " + e.message)
 
     sp.wait()
 
     if not done:
-        print("WARN: Continuing without support for BRIDGE_IP expansion")
+        warn("WARN: Continuing without support for BRIDGE_IP expansion")
 
     else:
         # ensure we have a valid ip
