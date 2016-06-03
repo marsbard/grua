@@ -1,8 +1,8 @@
 import os
-from util import warn
+from util import warn, mention
+from mem import mem
 
-registries = {}
-
+mem.registries = {}
 
 def load_registries():
     # first load default registry from /var/lib/grua
@@ -20,7 +20,11 @@ def load_registry(reg_spec):
     #    load_git_registry()
 
 def load_file_registry(reg_spec):
-    with open(reg_spec)
+    with open(reg_spec, 'r') as stream:
+        cfg = yaml.load(stream)
+        if cfg.has_key('registries'):
+            for registry in cfg['registries']:
+                mention "found registry: " + registry
 
 def register_stack(tag, spec):
     pass
