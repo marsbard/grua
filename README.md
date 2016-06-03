@@ -17,7 +17,7 @@ An opinionated declarative docker composition tool with runtime dependencies bet
 
 ## What's new
 
-* 2016-06-03 Made not finding docker0 non fatal (with warnings) and in the process it looks like mac support *might* be working...!
+* 2016-06-03 Made not finding docker0 non fatal (with warnings) 
 * 2016-06-02 Added support for volumes local to directory containing `grua.yaml`
 
 ## Installation
