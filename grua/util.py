@@ -2,6 +2,7 @@ import subprocess
 from subprocess import call
 import os
 import re
+import sys
 from mem import mem
 
 
@@ -23,6 +24,10 @@ def note(msg, ignore_quiet=False):
             print "> " + msg
 
 
+def warn(msg):
+        sys.stderr.write(">> " + msg + "\n")
+
+
 def quietcall(command):
     if mem.quiet:
         nullhandle = open(os.devnull, 'w')
@@ -34,6 +39,9 @@ def quietcall(command):
 
 def find_bridge_ip():
 
+    done = False
+    output = ""
+
     try:
         command = ["ip", "addr", "show", "dev", "docker0"]
         sp = subprocess.Popen(command, stdout=subprocess.PIPE)
@@ -43,13 +51,9 @@ def find_bridge_ip():
         done = True
 
     except OSError as e:
-        if e.errno == os.errno.ENOENT:
-            # handle file not found error.
-            print "File not found"
-            done = False
-        else:
-            # Something else went wrong
-            raise
+        pass
+    except subprocess.CalledProcessError as e:
+        pass
 
     if not done:
         try:
@@ -60,22 +64,21 @@ def find_bridge_ip():
             output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split(':')[1].split()[0]
 
         except OSError as e:
-            if e.errno == os.errno.ENOENT:
-                # handle file not found error.
-                done = False
-            else:
-                raise
-
-    if not done:
-        raise Exception("Could not find either 'ip' or 'ifconfig' in PATH")
+            pass
+        except subprocess.CalledProcessError as e:
+            pass
 
     sp.wait()
 
-    # ensure we have a valid ip
-    p = re.compile(
-            '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
-    if not p.match(output):
-        raise Exception(output + " is not a valid IP address for BridgeIP")
+    if not done:
+        warn("WARN: Continuing without support for BRIDGE_IP expansion")
+
+    else:
+        # ensure we have a valid ip
+        p = re.compile(
+                '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
+        if not p.match(output):
+            raise Exception(output + " is not a valid IP address for BridgeIP")
 
     return output
 

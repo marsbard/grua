@@ -17,6 +17,7 @@ An opinionated declarative docker composition tool with runtime dependencies bet
 
 ## What's new
 
+* 2016-06-03 Made not finding docker0 non fatal (with warnings) 
 * 2016-06-02 Added support for volumes local to directory containing `grua.yaml`
 
 ## Installation
@@ -522,6 +523,9 @@ Currently only supports two 'subcommands':
 * _BRIDGE_IP_
 
 Replace the template with the IP address of the docker bridge.
+
+_Important note: if grua can't find the docker0 interface, you will get a 
+warning at startup, and this expansion won't work._
 
 ```
 skydock:
