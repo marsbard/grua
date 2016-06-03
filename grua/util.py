@@ -34,6 +34,7 @@ def quietcall(command):
 
 def find_bridge_ip():
 
+    done = False
     try:
         command = ["ip", "addr", "show", "dev", "docker0"]
         sp = subprocess.Popen(command, stdout=subprocess.PIPE)
