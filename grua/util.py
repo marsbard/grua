@@ -44,14 +44,9 @@ def find_bridge_ip():
         done = True
 
     except OSError as e:
-        # if e.errno == os.errno.ENOENT:
-        #     # handle file not found error.
-        #     print "File not found"
-        #     done = False
-        # else:
-        #     # Something else went wrong
-        #     raise
-        print ("WARN: Could not use 'ip addr | grep inet' to find bridge ip")
+        print ("WARN: OSError Could not use 'ip addr | grep inet' to find bridge ip " + e.message)
+    except subprocess.CalledProcessError as e:
+        print ("WARN: CalledProcessError Could not use 'ip addr | grep inet' to find bridge ip " + e.message)
 
     if not done:
         try:
@@ -62,7 +57,9 @@ def find_bridge_ip():
             output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split(':')[1].split()[0]
 
         except OSError as e:
-            print("WARN: Could not use 'ifconfig to find bridge ip")
+            print("WARN: OSError Could not use 'ifconfig to find bridge ip " + e.message)
+        except subprocess.CalledProcessError as e:
+            print("WARN: CalledProcessError Could not use 'ifconfig to find bridge ip " + e.message)
 
     if not done:
         print("WARN: Continuing without support for BRIDGE_IP expansion")
