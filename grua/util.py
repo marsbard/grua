@@ -25,7 +25,6 @@ def note(msg, ignore_quiet=False):
 
 
 def warn(msg):
-    if not mem.quiet:
         sys.stderr.write( ">> " + msg)
 
 
@@ -72,7 +71,7 @@ def find_bridge_ip():
     sp.wait()
 
     if not done:
-        warn("WARN: Continuing without support for BRIDGE_IP expansion")
+        warnq("WARN: Continuing without support for BRIDGE_IP expansion")
 
     else:
         # ensure we have a valid ip
