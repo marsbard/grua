@@ -2,7 +2,6 @@ import subprocess
 from subprocess import call
 import os
 import re
-from warnings import showwarning
 from mem import mem
 
 
@@ -51,7 +50,7 @@ def find_bridge_ip():
         # else:
         #     # Something else went wrong
         #     raise
-        showwarning("Could not use 'ip addr | grep inet' to find bridge ip")
+        print ("WARN: Could not use 'ip addr | grep inet' to find bridge ip")
 
     if not done:
         try:
@@ -62,10 +61,10 @@ def find_bridge_ip():
             output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split(':')[1].split()[0]
 
         except OSError as e:
-            showwarning("Could not use 'ifconfig to find bridge ip")
+            print("WARN: Could not use 'ifconfig to find bridge ip")
 
     if not done:
-        showwarning("Continuing without support for BRIDGE_IP expansion")
+        print("WARN: Continuing without support for BRIDGE_IP expansion")
 
     sp.wait()
 
