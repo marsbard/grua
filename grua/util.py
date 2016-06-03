@@ -36,7 +36,7 @@ def find_bridge_ip():
 
     done = False
     output = ""
-    
+
     try:
         command = ["ip", "addr", "show", "dev", "docker0"]
         sp = subprocess.Popen(command, stdout=subprocess.PIPE)
@@ -63,16 +63,17 @@ def find_bridge_ip():
         except subprocess.CalledProcessError as e:
             print("WARN: CalledProcessError Could not use 'ifconfig to find bridge ip " + e.message)
 
+    sp.wait()
+
     if not done:
         print("WARN: Continuing without support for BRIDGE_IP expansion")
 
-    sp.wait()
-
-    # ensure we have a valid ip
-    p = re.compile(
-            '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
-    if not p.match(output):
-        raise Exception(output + " is not a valid IP address for BridgeIP")
+    else:
+        # ensure we have a valid ip
+        p = re.compile(
+                '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
+        if not p.match(output):
+            raise Exception(output + " is not a valid IP address for BridgeIP")
 
     return output
 
