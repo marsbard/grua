@@ -25,7 +25,7 @@ def note(msg, ignore_quiet=False):
 
 
 def warn(msg):
-    sys.stderr.write( ">> " + msg)
+    sys.stderr.write( ">> " + msg + "\n")
 
 
 def quietcall(command):
