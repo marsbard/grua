@@ -1,4 +1,5 @@
 import os
+import yaml
 from util import warn, mention
 from mem import mem
 
@@ -12,7 +13,7 @@ def load_registries():
 def load_registry(reg_spec):
     if reg_spec.startswith("/"):
         if not os.path.isfile(reg_spec + "/reg.yml"):
-            warn(reg_spec + " does not exist on disk")
+            warn("Registry " + reg_spec + "/reg.yml does not exist on disk, cannot load")
             return
         load_file_registry(reg_spec)
 
@@ -26,5 +27,4 @@ def load_file_registry(reg_spec):
             for registry in cfg['registries']:
                 mention "found registry: " + registry
 
-def register_stack(tag, spec):
-    pass
+

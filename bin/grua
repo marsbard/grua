@@ -3,14 +3,18 @@
 from grua import grua
 from grua.deps import calc_deps, sort_containers
 from grua.mem import mem
+from grua.registry import load_registries
 import yaml
 import sys
 import errno
 import os
 
+
 args = sys.argv[1:]
 
 mem.yaml_path = grua.find_yaml_location()
+
+load_registries()
 
 args2 = args
 args = []
@@ -45,6 +49,7 @@ except OSError as exc:  # Python >2.5
         pass
     else:
         raise
+
 
 mem.sorted_run_deps = sort_containers()
 
