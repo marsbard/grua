@@ -51,9 +51,9 @@ def find_bridge_ip():
         done = True
 
     except OSError as e:
-        warn ("WARN: OSError Could not use 'ip addr | grep inet' to find bridge ip " + e.message)
+        pass
     except subprocess.CalledProcessError as e:
-        warn ("WARN: CalledProcessError Could not use 'ip addr | grep inet' to find bridge ip " + e.message)
+        pass
 
     if not done:
         try:
@@ -64,9 +64,9 @@ def find_bridge_ip():
             output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split(':')[1].split()[0]
 
         except OSError as e:
-            warn("WARN: OSError Could not use 'ifconfig to find bridge ip " + e.message)
+            pass
         except subprocess.CalledProcessError as e:
-            warn("WARN: CalledProcessError Could not use 'ifconfig to find bridge ip " + e.message)
+            pass
 
     sp.wait()
 
