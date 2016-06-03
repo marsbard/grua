@@ -37,23 +37,7 @@ def quietcall(command):
         call(command)
 
 
-#############
-
-
-cached_bridge_ip = None
-
-
 def find_bridge_ip():
-    global cached_bridge_ip
-
-    if cached_bridge_ip is not None:
-        return cached_bridge_ip
-    else:
-        cached_bridge_ip = find_bridge_ip_impl()
-        return cached_bridge_ip
-
-
-def find_bridge_ip_impl():
 
     done = False
     output = ""
@@ -97,9 +81,6 @@ def find_bridge_ip_impl():
             raise Exception(output + " is not a valid IP address for BridgeIP")
 
     return output
-
-
-#####
 
 
 def touch(fname, times=None):
