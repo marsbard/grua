@@ -25,6 +25,6 @@ def load_file_registry(reg_spec):
         cfg = yaml.load(stream)
         if cfg.has_key('registries'):
             for registry in cfg['registries']:
-                mention "found registry: " + registry
+                mention("found registry: " + registry)
 
 
