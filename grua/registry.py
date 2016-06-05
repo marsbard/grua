@@ -21,6 +21,8 @@ def load_registry(reg_spec):
     #    load_git_registry()
 
 def load_file_registry(reg_spec):
+    reg_spec = reg_spec + "/reg.yml"
+    warn("load file registry " + reg_spec)
     with open(reg_spec, 'r') as stream:
         cfg = yaml.load(stream)
         if cfg.has_key('registries'):

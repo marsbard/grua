@@ -3,3 +3,5 @@
 cd "`dirname $0`"
 sudo python setup.py install
 sudo cp -v bin/grua /usr/local/bin
+sudo mkdir -p /var/lib/grua/reg
+sudo cp reg.yml /var/lib/grua/reg
