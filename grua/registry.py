@@ -15,10 +15,11 @@ def load_registry(reg_spec):
         if not os.path.isfile(reg_spec + "/reg.yml"):
             warn("Registry " + reg_spec + "/reg.yml does not exist on disk, cannot load")
             return
-        load_file_registry(reg_spec)
+        load_file_registry(reg_spec) 
 
-    #if reg_spec.startswith("git:"):
+    # if reg_spec.startswith("git:"):
     #    load_git_registry()
+
 
 def load_file_registry(reg_spec):
     with open(reg_spec, 'r') as stream:
