@@ -14,7 +14,6 @@ args = sys.argv[1:]
 
 mem.yaml_path = grua.find_yaml_location()
 
-load_registries()
 
 args2 = args
 args = []
@@ -54,6 +53,9 @@ except OSError as exc:  # Python >2.5
 mem.sorted_run_deps = sort_containers()
 
 mem.Mode = grua.get_mode()
+
+load_registries()
+
 
 if len(args) == 0:
     grua.usage()

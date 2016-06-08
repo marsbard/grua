@@ -1,2 +1,2 @@
 registries:
-  - git:https://github.com/marsbard/grua-repo/blob/master/reg.yml
+  - master:git:https://github.com/marsbard/grua-repo/blob/master/reg.yml

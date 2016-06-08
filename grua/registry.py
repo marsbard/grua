@@ -5,6 +5,7 @@ from mem import mem
 
 mem.registries = {}
 
+
 def load_registries():
     # first load default registry from /var/lib/grua
     load_registry("/var/lib/grua/reg")
@@ -22,12 +23,19 @@ def load_registry(reg_spec):
 
 
 def load_file_registry(reg_spec):
-    reg_spec = reg_spec + "/reg.yml"
+    reg_spec += "/reg.yml"
     warn("load file registry " + reg_spec)
     with open(reg_spec, 'r') as stream:
         cfg = yaml.load(stream)
         if cfg.has_key('registries'):
             for registry in cfg['registries']:
                 mention("found registry: " + registry)
-
+                bits = registry.split(":",1)
+                name = bits[0]
+                reg = bits[1]
+                if mem.registries.has_key(name):
+                    warn ("Registry " + name + " was already registered. Not overwriting it.")
+                else:
+                    warn ("Registering new registry: " + )
+                    mem.registries[name] = bits[1]
 
