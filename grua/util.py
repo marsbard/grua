@@ -68,7 +68,7 @@ def find_bridge_ip():
         except subprocess.CalledProcessError as e:
             pass
 
-    sp.wait()
+        sp.wait()
 
     if not done:
         warn("WARN: Continuing without support for BRIDGE_IP expansion")
