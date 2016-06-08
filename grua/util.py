@@ -62,13 +62,14 @@ def find_bridge_ip():
             sp = subprocess.Popen(command, stdout=subprocess.PIPE)
 
             output = subprocess.check_output(('grep', 'inet'), stdin=sp.stdout).strip().split(':')[1].split()[0]
-
+            sp.wait()
+            
         except OSError as e:
             pass
         except subprocess.CalledProcessError as e:
             pass
 
-        sp.wait()
+        
 
     if not done:
         warn("WARN: Continuing without support for BRIDGE_IP expansion")
